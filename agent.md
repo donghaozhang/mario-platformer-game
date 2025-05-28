@@ -144,7 +144,7 @@ mario/
 - [x] **Visual Enhancements**
   - [x] Weather effects
   - [x] Download some image assest from internet, add them to the game
-  - [ ] Better sprite graphics
+  - [x] Better sprite graphics
 
 ## 🔧 Necessary Functions
 

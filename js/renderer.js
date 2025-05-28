@@ -135,82 +135,160 @@ function drawPlayer() {
     
     ctx.save();
     
-    // Get appropriate sprite based on player state
-    let spriteKey = 'player_idle';
-    if (player.powerUp === 'big') {
-        spriteKey = 'player_big';
-    } else if (player.powerUp === 'fire') {
-        spriteKey = 'player_fire';
-    } else if (player.velocityY !== 0) {
-        spriteKey = 'player_jump';
-    } else if (Math.abs(player.velocityX) > 0.1) {
-        spriteKey = 'player_walk';
+    // Apply transformations for facing direction
+    if (player.facingLeft) {
+        ctx.translate(player.x + player.width, player.y);
+        ctx.scale(-1, 1);
+        ctx.translate(-player.x, -player.y);
     }
     
-    // Try to get the sprite
-    const sprite = getAsset(spriteKey);
+    // Apply invincibility flashing
+    if (player.invincible && Math.floor(Date.now() / 100) % 2) {
+        ctx.globalAlpha = 0.5;
+    }
     
-    if (sprite && sprite.width > 0) {
-        // Draw sprite
-        if (player.facingLeft) {
-            ctx.scale(-1, 1);
-            ctx.drawImage(sprite, -player.x - player.width, player.y, player.width, player.height);
-        } else {
-            ctx.drawImage(sprite, player.x, player.y, player.width, player.height);
-        }
+    // Apply star power rainbow effect
+    if (player.powerUp === 'star') {
+        const time = Date.now() / 100;
+        const hue = (time * 50) % 360;
+        ctx.shadowColor = `hsl(${hue}, 100%, 50%)`;
+        ctx.shadowBlur = 10;
+    }
+    
+    // Scale player based on power-up
+    const scale = player.powerUp === 'big' || player.powerUp === 'fire' ? 1.25 : 1;
+    ctx.translate(player.x + player.width/2, player.y + player.height);
+    ctx.scale(scale, scale);
+    ctx.translate(-player.width/2, -player.height);
+    
+    // Draw Mario with detailed sprite
+    const isJumping = player.velocityY !== 0;
+    const isWalking = Math.abs(player.velocityX) > 0.1;
+    const walkFrame = Math.floor(player.animationFrame / 5) % 4;
+    
+    // Body proportions
+    const headSize = 12;
+    const bodyHeight = 15;
+    const legHeight = 13;
+    
+    // Colors based on power-up
+    let hatColor = '#FF0000';
+    let shirtColor = '#FF0000';
+    let overallsColor = '#0000FF';
+    
+    if (player.powerUp === 'fire') {
+        hatColor = '#FFFFFF';
+        shirtColor = '#FFFFFF';
+        overallsColor = '#FF0000';
+    }
+    
+    // Draw legs with walking animation
+    ctx.fillStyle = overallsColor;
+    if (isWalking && !isJumping) {
+        // Animated walking legs
+        const legOffset = walkFrame < 2 ? 0 : 3;
+        ctx.fillRect(5, bodyHeight + headSize, 8, legHeight - legOffset); // Left leg
+        ctx.fillRect(17, bodyHeight + headSize + legOffset, 8, legHeight - legOffset); // Right leg
+    } else if (isJumping) {
+        // Jumping pose - spread legs
+        ctx.fillRect(3, bodyHeight + headSize, 8, legHeight - 2); // Left leg
+        ctx.fillRect(19, bodyHeight + headSize, 8, legHeight - 2); // Right leg
     } else {
-        // Fallback to original drawing code
-        // Apply invincibility flashing
-        if (player.invincible && Math.floor(Date.now() / 100) % 2) {
-            ctx.globalAlpha = 0.5;
-        }
-        
-        // Apply star power rainbow effect
-        if (player.powerUp === 'star') {
-            const time = Date.now() / 100;
-            const hue = (time * 50) % 360;
-            ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-        } else if (player.powerUp === 'fire') {
-            ctx.fillStyle = '#FF4500'; // Orange-red for fire Mario
-        } else if (player.powerUp === 'big') {
-            ctx.fillStyle = '#FF6B6B'; // Lighter red for big Mario
-        } else {
-            ctx.fillStyle = '#FF0000'; // Red for small Mario
-        }
-        
-        // Draw player body
-        ctx.fillRect(player.x, player.y, player.width, player.height);
-        
-        // Draw player details (hat, overalls, etc.)
-        ctx.fillStyle = '#0000FF'; // Blue overalls
-        ctx.fillRect(player.x + 5, player.y + 15, player.width - 10, player.height - 20);
-        
-        // Draw face
-        ctx.fillStyle = '#FFDBAC'; // Skin color
-        ctx.fillRect(player.x + 8, player.y + 5, player.width - 16, 12);
-        
-        // Draw hat
-        ctx.fillStyle = '#FF0000'; // Red hat
-        ctx.fillRect(player.x + 3, player.y, player.width - 6, 8);
-        
-        // Draw mustache
-        ctx.fillStyle = '#8B4513'; // Brown mustache
-        ctx.fillRect(player.x + 10, player.y + 12, player.width - 20, 3);
-        
-        // Animation effects
-        if (player.animationFrame > 0) {
-            // Walking animation - slight offset
-            const offset = Math.sin(player.animationFrame * 0.3) * 2;
-            ctx.translate(offset, 0);
-        }
-        
-        if (player.velocityY !== 0) {
-            // Jumping animation - spread arms
-            ctx.fillStyle = '#FFDBAC';
-            ctx.fillRect(player.x - 5, player.y + 10, 5, 8); // Left arm
-            ctx.fillRect(player.x + player.width, player.y + 10, 5, 8); // Right arm
-        }
+        // Standing pose
+        ctx.fillRect(7, bodyHeight + headSize, 7, legHeight); // Left leg
+        ctx.fillRect(16, bodyHeight + headSize, 7, legHeight); // Right leg
     }
+    
+    // Draw shoes
+    ctx.fillStyle = '#8B4513'; // Brown shoes
+    if (isWalking && !isJumping) {
+        const shoeOffset = walkFrame < 2 ? 0 : 3;
+        ctx.fillRect(3, bodyHeight + headSize + legHeight - 3 - shoeOffset, 10, 3); // Left shoe
+        ctx.fillRect(17, bodyHeight + headSize + legHeight - 3 + shoeOffset, 10, 3); // Right shoe
+    } else {
+        ctx.fillRect(5, bodyHeight + headSize + legHeight - 3, 9, 3); // Left shoe
+        ctx.fillRect(16, bodyHeight + headSize + legHeight - 3, 9, 3); // Right shoe
+    }
+    
+    // Draw body/overalls
+    ctx.fillStyle = overallsColor;
+    ctx.fillRect(6, headSize + 3, 18, bodyHeight - 3);
+    
+    // Draw shirt/chest area
+    ctx.fillStyle = shirtColor;
+    ctx.fillRect(8, headSize, 14, 8);
+    
+    // Draw arms
+    ctx.fillStyle = '#FFDBAC'; // Skin color
+    if (isJumping) {
+        // Arms spread out when jumping
+        ctx.fillRect(0, headSize + 2, 6, 10); // Left arm
+        ctx.fillRect(24, headSize + 2, 6, 10); // Right arm
+    } else if (isWalking) {
+        // Swinging arms when walking
+        const armSwing = walkFrame < 2 ? 0 : 2;
+        ctx.fillRect(2 + armSwing, headSize + 4, 5, 8); // Left arm
+        ctx.fillRect(23 - armSwing, headSize + 4, 5, 8); // Right arm
+    } else {
+        // Arms at sides
+        ctx.fillRect(3, headSize + 4, 5, 8); // Left arm
+        ctx.fillRect(22, headSize + 4, 5, 8); // Right arm
+    }
+    
+    // Draw gloves
+    ctx.fillStyle = '#FFFFFF';
+    if (isJumping) {
+        ctx.fillRect(0, headSize + 10, 6, 4); // Left glove
+        ctx.fillRect(24, headSize + 10, 6, 4); // Right glove
+    } else {
+        ctx.fillRect(2, headSize + 10, 6, 4); // Left glove
+        ctx.fillRect(22, headSize + 10, 6, 4); // Right glove
+    }
+    
+    // Draw head
+    ctx.fillStyle = '#FFDBAC'; // Skin color
+    ctx.fillRect(7, 3, 16, headSize);
+    
+    // Draw hat
+    ctx.fillStyle = hatColor;
+    ctx.fillRect(5, 0, 20, 8);
+    ctx.fillRect(7, 0, 16, 10); // Hat brim
+    
+    // Draw hat emblem (M)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(13, 2, 4, 1);
+    ctx.fillRect(12, 3, 1, 3);
+    ctx.fillRect(14, 3, 1, 2);
+    ctx.fillRect(17, 3, 1, 3);
+    
+    // Draw hair sideburns
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(6, 8, 2, 4);
+    ctx.fillRect(22, 8, 2, 4);
+    
+    // Draw eyes
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(10, 6, 2, 3);
+    ctx.fillRect(18, 6, 2, 3);
+    
+    // Draw mustache
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(9, 11, 12, 2);
+    ctx.fillRect(8, 10, 14, 1);
+    
+    // Draw nose
+    ctx.fillStyle = '#FFDBAC';
+    ctx.fillRect(14, 9, 3, 2);
+    
+    // Draw overall straps
+    ctx.fillStyle = overallsColor;
+    ctx.fillRect(9, headSize, 2, 4);
+    ctx.fillRect(19, headSize, 2, 4);
+    
+    // Draw buttons on overalls
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(10, headSize + 8, 2, 2);
+    ctx.fillRect(18, headSize + 8, 2, 2);
     
     ctx.restore();
 }
@@ -263,113 +341,317 @@ function drawEnemies() {
 
 // Fallback drawing functions for enemies
 function drawGoomba(enemy) {
-    // Body
+    // Animation frame for walking
+    const walkFrame = Math.floor(enemy.animationFrame / 10) % 2;
+    const squashAmount = walkFrame * 2;
+    
+    // Mushroom body
     ctx.fillStyle = '#8B4513';
-    ctx.fillRect(enemy.x, enemy.y + 5, enemy.width, enemy.height - 5);
+    ctx.fillRect(enemy.x + 2, enemy.y + 8 + squashAmount, enemy.width - 4, enemy.height - 8 - squashAmount);
     
-    // Head
+    // Mushroom cap with gradient effect
     ctx.fillStyle = '#A0522D';
-    ctx.fillRect(enemy.x + 2, enemy.y, enemy.width - 4, enemy.height - 8);
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + 10, enemy.width/2 - 2, 10 - squashAmount/2, 0, 0, Math.PI * 2);
+    ctx.fill();
     
-    // Eyes
+    // Cap highlight
+    ctx.fillStyle = '#CD853F';
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2 - 3, enemy.y + 8, enemy.width/3, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Angry eyebrows
     ctx.fillStyle = '#000000';
-    ctx.fillRect(enemy.x + 5, enemy.y + 3, 2, 2);
-    ctx.fillRect(enemy.x + enemy.width - 7, enemy.y + 3, 2, 2);
+    ctx.fillRect(enemy.x + 6, enemy.y + 5, 6, 2);
+    ctx.fillRect(enemy.x + enemy.width - 12, enemy.y + 5, 6, 2);
     
-    // Feet
+    // Eyes with direction
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(enemy.x + 7, enemy.y + 8, 5, 5);
+    ctx.fillRect(enemy.x + enemy.width - 12, enemy.y + 8, 5, 5);
+    
+    // Pupils looking in movement direction
+    ctx.fillStyle = '#000000';
+    const pupilOffset = enemy.velocityX > 0 ? 2 : 0;
+    ctx.fillRect(enemy.x + 8 + pupilOffset, enemy.y + 9, 2, 3);
+    ctx.fillRect(enemy.x + enemy.width - 11 + pupilOffset, enemy.y + 9, 2, 3);
+    
+    // Frown mouth
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(enemy.x + enemy.width/2, enemy.y + 18, 4, 0, Math.PI);
+    ctx.stroke();
+    
+    // Feet with walking animation
     ctx.fillStyle = '#654321';
-    ctx.fillRect(enemy.x, enemy.y + enemy.height - 3, 5, 3);
-    ctx.fillRect(enemy.x + enemy.width - 5, enemy.y + enemy.height - 3, 5, 3);
+    if (walkFrame === 0) {
+        ctx.fillRect(enemy.x + 2, enemy.y + enemy.height - 4, 6, 4);
+        ctx.fillRect(enemy.x + enemy.width - 8, enemy.y + enemy.height - 4, 6, 4);
+    } else {
+        ctx.fillRect(enemy.x + 5, enemy.y + enemy.height - 4, 6, 4);
+        ctx.fillRect(enemy.x + enemy.width - 11, enemy.y + enemy.height - 4, 6, 4);
+    }
 }
 
 function drawKoopa(enemy) {
-    // Shell
-    ctx.fillStyle = '#228B22';
-    ctx.fillRect(enemy.x + 2, enemy.y + 8, enemy.width - 4, enemy.height - 12);
+    const walkFrame = Math.floor(enemy.animationFrame / 8) % 4;
+    const bobAmount = Math.sin(enemy.animationFrame * 0.1) * 2;
     
-    // Head
-    ctx.fillStyle = '#FFFF99';
-    ctx.fillRect(enemy.x + 4, enemy.y, enemy.width - 8, 12);
+    // Shell back
+    ctx.fillStyle = '#228B22';
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + 15 + bobAmount, enemy.width/2 - 2, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Shell pattern
+    ctx.strokeStyle = '#006400';
+    ctx.lineWidth = 2;
+    // Hexagon pattern on shell
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 2; j++) {
+            ctx.strokeRect(enemy.x + 5 + i * 8, enemy.y + 10 + j * 8 + bobAmount, 6, 6);
+        }
+    }
+    
+    // Head and neck
+    ctx.fillStyle = '#90EE90';
+    ctx.fillRect(enemy.x + 8, enemy.y + 2 + bobAmount, 14, 8);
+    ctx.fillRect(enemy.x + 10, enemy.y + 8 + bobAmount, 10, 4);
+    
+    // Beak
+    ctx.fillStyle = '#FFD700';
+    ctx.beginPath();
+    ctx.moveTo(enemy.x + 8, enemy.y + 5 + bobAmount);
+    ctx.lineTo(enemy.x + 4, enemy.y + 7 + bobAmount);
+    ctx.lineTo(enemy.x + 8, enemy.y + 9 + bobAmount);
+    ctx.fill();
     
     // Eyes
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(enemy.x + 6, enemy.y + 3, 2, 2);
-    ctx.fillRect(enemy.x + enemy.width - 8, enemy.y + 3, 2, 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(enemy.x + 12, enemy.y + 3 + bobAmount, 4, 4);
+    ctx.fillRect(enemy.x + 17, enemy.y + 3 + bobAmount, 4, 4);
     
-    // Feet
-    ctx.fillStyle = '#FFFF99';
-    ctx.fillRect(enemy.x, enemy.y + enemy.height - 4, 4, 4);
-    ctx.fillRect(enemy.x + enemy.width - 4, enemy.y + enemy.height - 4, 4, 4);
+    // Pupils
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(enemy.x + 13, enemy.y + 4 + bobAmount, 2, 2);
+    ctx.fillRect(enemy.x + 18, enemy.y + 4 + bobAmount, 2, 2);
+    
+    // Feet with walking animation
+    ctx.fillStyle = '#FFD700';
+    const footOffset = walkFrame < 2 ? 0 : 3;
+    ctx.fillRect(enemy.x + 3 + footOffset, enemy.y + enemy.height - 5, 6, 5);
+    ctx.fillRect(enemy.x + enemy.width - 9 - footOffset, enemy.y + enemy.height - 5, 6, 5);
+    
+    // Tail
+    ctx.fillStyle = '#90EE90';
+    ctx.fillRect(enemy.x + enemy.width - 4, enemy.y + 12 + bobAmount, 6, 4);
 }
 
 function drawFlyingEnemy(enemy) {
-    // Body
-    ctx.fillStyle = '#FF8C00';
-    ctx.fillRect(enemy.x + 3, enemy.y + 5, enemy.width - 6, enemy.height - 10);
+    const wingFlap = Math.sin(Date.now() * 0.02) * 5;
+    const floatOffset = Math.sin(Date.now() * 0.005) * 3;
+    
+    // Main body (red koopa paratroopa style)
+    ctx.fillStyle = '#DC143C';
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset, enemy.width/2 - 3, enemy.height/2 - 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Shell pattern
+    ctx.strokeStyle = '#8B0000';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset, enemy.width/2 - 5, enemy.height/2 - 7, 0, 0, Math.PI * 2);
+    ctx.stroke();
     
     // Wings (animated)
-    const wingFlap = Math.sin(Date.now() * 0.02) * 3;
-    ctx.fillStyle = '#FFE4B5';
-    ctx.fillRect(enemy.x, enemy.y + 3 + wingFlap, 3, 8);
-    ctx.fillRect(enemy.x + enemy.width - 3, enemy.y + 3 - wingFlap, 3, 8);
+    ctx.fillStyle = '#FFFFFF';
+    // Left wing
+    ctx.save();
+    ctx.translate(enemy.x + 5, enemy.y + 8 + floatOffset);
+    ctx.rotate(wingFlap * 0.02);
+    ctx.beginPath();
+    ctx.ellipse(-5, 0, 8, 4 + Math.abs(wingFlap)/2, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
     
-    // Eyes
+    // Right wing
+    ctx.save();
+    ctx.translate(enemy.x + enemy.width - 5, enemy.y + 8 + floatOffset);
+    ctx.rotate(-wingFlap * 0.02);
+    ctx.beginPath();
+    ctx.ellipse(5, 0, 8, 4 + Math.abs(wingFlap)/2, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    
+    // Wing details
+    ctx.strokeStyle = '#CCCCCC';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Head
+    ctx.fillStyle = '#FFB6C1';
+    ctx.fillRect(enemy.x + 8, enemy.y + 2 + floatOffset, 14, 8);
+    
+    // Goggles/Eyes
     ctx.fillStyle = '#000000';
-    ctx.fillRect(enemy.x + 5, enemy.y + 7, 2, 2);
-    ctx.fillRect(enemy.x + enemy.width - 7, enemy.y + 7, 2, 2);
+    ctx.fillRect(enemy.x + 9, enemy.y + 3 + floatOffset, 5, 5);
+    ctx.fillRect(enemy.x + 16, enemy.y + 3 + floatOffset, 5, 5);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(enemy.x + 10, enemy.y + 4 + floatOffset, 3, 3);
+    ctx.fillRect(enemy.x + 17, enemy.y + 4 + floatOffset, 3, 3);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(enemy.x + 11, enemy.y + 5 + floatOffset, 1, 1);
+    ctx.fillRect(enemy.x + 18, enemy.y + 5 + floatOffset, 1, 1);
+    
+    // Beak
+    ctx.fillStyle = '#FFA500';
+    ctx.beginPath();
+    ctx.moveTo(enemy.x + 8, enemy.y + 6 + floatOffset);
+    ctx.lineTo(enemy.x + 5, enemy.y + 8 + floatOffset);
+    ctx.lineTo(enemy.x + 8, enemy.y + 10 + floatOffset);
+    ctx.fill();
 }
 
 function drawBossEnemy(enemy) {
-    // Body
-    ctx.fillStyle = '#800080';
-    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+    const pulseAmount = Math.sin(Date.now() * 0.003) * 2;
+    const angryFlash = enemy.health < enemy.maxHealth / 2;
+    
+    // Spiky shell body
+    const gradient = ctx.createRadialGradient(
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2,
+        0,
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2,
+        enemy.width/2
+    );
+    gradient.addColorStop(0, angryFlash ? '#FF1493' : '#8B008B');
+    gradient.addColorStop(1, angryFlash ? '#8B0000' : '#4B0082');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(enemy.x, enemy.y + 5, enemy.width, enemy.height - 5);
+    
+    // Spikes around the shell
+    ctx.fillStyle = angryFlash ? '#FF0000' : '#9400D3';
+    for (let i = 0; i < enemy.width; i += 10) {
+        // Top spikes
+        ctx.beginPath();
+        ctx.moveTo(enemy.x + i, enemy.y + 5);
+        ctx.lineTo(enemy.x + i + 5, enemy.y - 5 - pulseAmount);
+        ctx.lineTo(enemy.x + i + 10, enemy.y + 5);
+        ctx.fill();
+        
+        // Side spikes
+        if (i % 20 === 0) {
+            // Left spike
+            ctx.beginPath();
+            ctx.moveTo(enemy.x, enemy.y + i/2 + 10);
+            ctx.lineTo(enemy.x - 5 - pulseAmount, enemy.y + i/2 + 15);
+            ctx.lineTo(enemy.x, enemy.y + i/2 + 20);
+            ctx.fill();
+            
+            // Right spike
+            ctx.beginPath();
+            ctx.moveTo(enemy.x + enemy.width, enemy.y + i/2 + 10);
+            ctx.lineTo(enemy.x + enemy.width + 5 + pulseAmount, enemy.y + i/2 + 15);
+            ctx.lineTo(enemy.x + enemy.width, enemy.y + i/2 + 20);
+            ctx.fill();
+        }
+    }
+    
+    // Angry face
+    ctx.fillStyle = '#FFFF00';
+    ctx.fillRect(enemy.x + 10, enemy.y + 10, 10, 8);
+    ctx.fillRect(enemy.x + enemy.width - 20, enemy.y + 10, 10, 8);
+    
+    // Glowing red eyes
+    ctx.fillStyle = '#FF0000';
+    ctx.shadowColor = '#FF0000';
+    ctx.shadowBlur = 5;
+    ctx.fillRect(enemy.x + 12, enemy.y + 12, 6, 4);
+    ctx.fillRect(enemy.x + enemy.width - 18, enemy.y + 12, 6, 4);
+    ctx.shadowBlur = 0;
+    
+    // Angry mouth
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(enemy.x + 15, enemy.y + 25, enemy.width - 30, 3);
+    // Teeth
+    ctx.fillStyle = '#FFFFFF';
+    for (let i = 0; i < enemy.width - 30; i += 5) {
+        ctx.beginPath();
+        ctx.moveTo(enemy.x + 15 + i, enemy.y + 25);
+        ctx.lineTo(enemy.x + 17 + i, enemy.y + 28);
+        ctx.lineTo(enemy.x + 19 + i, enemy.y + 25);
+        ctx.fill();
+    }
     
     // Health bar
-    if (enemy.health < enemy.maxHealth) {
-        const barWidth = enemy.width;
-        const barHeight = 4;
-        const healthPercent = enemy.health / enemy.maxHealth;
-        
-        // Background
-        ctx.fillStyle = '#FF0000';
-        ctx.fillRect(enemy.x, enemy.y - 8, barWidth, barHeight);
-        
-        // Health
-        ctx.fillStyle = '#00FF00';
-        ctx.fillRect(enemy.x, enemy.y - 8, barWidth * healthPercent, barHeight);
-    }
+    const barWidth = enemy.width;
+    const barHeight = 6;
+    const healthPercent = enemy.health / enemy.maxHealth;
     
-    // Eyes
-    ctx.fillStyle = '#FF0000';
-    ctx.fillRect(enemy.x + 8, enemy.y + 8, 4, 4);
-    ctx.fillRect(enemy.x + enemy.width - 12, enemy.y + 8, 4, 4);
+    // Health bar background
+    ctx.fillStyle = '#333333';
+    ctx.fillRect(enemy.x, enemy.y - 10, barWidth, barHeight);
     
-    // Spikes
-    ctx.fillStyle = '#4B0082';
-    for (let i = 0; i < enemy.width; i += 8) {
-        ctx.fillRect(enemy.x + i, enemy.y - 3, 4, 3);
-    }
+    // Health bar fill
+    const healthGradient = ctx.createLinearGradient(enemy.x, 0, enemy.x + barWidth * healthPercent, 0);
+    healthGradient.addColorStop(0, healthPercent > 0.5 ? '#00FF00' : healthPercent > 0.25 ? '#FFFF00' : '#FF0000');
+    healthGradient.addColorStop(1, healthPercent > 0.5 ? '#00AA00' : healthPercent > 0.25 ? '#AAAA00' : '#AA0000');
+    ctx.fillStyle = healthGradient;
+    ctx.fillRect(enemy.x, enemy.y - 10, barWidth * healthPercent, barHeight);
+    
+    // Health bar border
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(enemy.x, enemy.y - 10, barWidth, barHeight);
 }
 
 function drawKoopaShell(enemy) {
-    // Shell
-    ctx.fillStyle = '#228B22';
-    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+    const isMoving = Math.abs(enemy.velocityX) > 1;
+    const spinAngle = isMoving ? Date.now() * 0.05 : 0;
     
-    // Shell pattern
-    ctx.fillStyle = '#32CD32';
-    ctx.fillRect(enemy.x + 2, enemy.y + 2, enemy.width - 4, enemy.height - 4);
+    ctx.save();
+    ctx.translate(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
+    ctx.rotate(spinAngle);
     
-    // Spinning effect if moving
-    if (Math.abs(enemy.velocityX) > 1) {
-        const spinLines = Math.floor(Date.now() / 50) % 4;
-        ctx.fillStyle = '#FFFFFF';
-        for (let i = 0; i < 4; i++) {
-            if (i === spinLines) {
-                ctx.fillRect(enemy.x + i * (enemy.width / 4), enemy.y, 2, enemy.height);
-            }
-        }
+    // Shell body
+    const shellGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, enemy.width/2);
+    shellGradient.addColorStop(0, '#32CD32');
+    shellGradient.addColorStop(0.7, '#228B22');
+    shellGradient.addColorStop(1, '#006400');
+    ctx.fillStyle = shellGradient;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, enemy.width/2, enemy.height/2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Shell pattern (hexagons)
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 3) {
+        const x = Math.cos(angle) * 8;
+        const y = Math.sin(angle) * 8;
+        ctx.beginPath();
+        ctx.moveTo(x + 4, y);
+        ctx.lineTo(x + 2, y + 3);
+        ctx.lineTo(x - 2, y + 3);
+        ctx.lineTo(x - 4, y);
+        ctx.lineTo(x - 2, y - 3);
+        ctx.lineTo(x + 2, y - 3);
+        ctx.closePath();
+        ctx.stroke();
     }
+    
+    // Motion blur effect when spinning fast
+    if (isMoving) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, enemy.width/2 - 2, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    
+    ctx.restore();
 }
 
 // Draw coins with 3D spinning effect and sprite support
