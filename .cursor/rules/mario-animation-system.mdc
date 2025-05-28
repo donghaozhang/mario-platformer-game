@@ -1,0 +1,200 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Mario Animation System Guide
+
+This rule documents the comprehensive animation system implemented in the Mario game, covering player, enemy, coin, and power-up animations.
+
+## Animation Framework
+
+All animated objects in [script.js](mdc:script.js) use this consistent pattern:
+```javascript
+{
+    animationFrame: number,    // Current frame index
+    animationTimer: number,    // Frame timing counter
+    // Animation-specific properties
+}
+```
+
+## Player Animation States
+
+The player object tracks multiple animation states:
+```javascript
+player.isWalking = Math.abs(player.velocityX) > 0.1 && player.onGround;
+player.isJumping = !player.onGround;
+player.direction = 1 | -1;  // Sprite flipping direction
+```
+
+### Player Animation Types
+
+#### Idle Animation
+- **Trigger**: No movement, on ground
+- **Visual**: Detailed sprite with eyes, hat, overalls, buttons
+- **Colors**: Dynamic based on power-up state
+
+#### Walking Animation  
+- **Frames**: 4-frame cycle
+- **Timing**: Changes every 8 game frames
+- **Features**: Bobbing body, animated legs, directional sprite flipping
+- **Pattern**: Alternating leg positions with body offset
+
+#### Jumping Animation
+- **Trigger**: Player not on ground
+- **Visual**: Stretched sprite with spread arms
+- **Features**: Excited eyes, extended body height (+2px)
+
+## Enemy Animation System
+
+### Goomba Animations
+- **Walking Cycle**: 2-frame bouncing animation (15 frames per change)
+- **Visual Features**:
+  - Bouncing body movement
+  - Animated feet positioning
+  - Directional eye movement based on velocity
+  - Occasional blinking (5% chance per frame)
+  - Angry eyebrows and frown
+
+```javascript
+// Enemy animation pattern
+enemy.animationTimer++;
+if (enemy.animationTimer >= 15) {
+    enemy.animationFrame = (enemy.animationFrame + 1) % 2;
+    enemy.animationTimer = 0;
+}
+```
+
+## Coin Animation System
+
+### 3D Spinning Effect
+- **Frames**: 8-frame rotation cycle
+- **Timing**: Changes every 6 game frames
+- **Visual**: Simulated 3D rotation using width scaling
+- **Effects**: 
+  - Shine effect when facing forward
+  - Dollar sign visibility based on rotation
+  - Floating motion with sine wave
+
+```javascript
+const scaleFactors = [1, 0.8, 0.6, 0.4, 0.2, 0.4, 0.6, 0.8];
+const scaleX = scaleFactors[frame];
+```
+
+## Platform Animation System
+
+### Animated Textures
+- **Moving Patterns**: Sine wave-based texture offset
+- **Grass Effects**: Animated grass blades on green platforms
+- **Brick Patterns**: Offset brick layout on brown platforms
+- **Highlights**: Dynamic top highlights and bottom shadows
+
+```javascript
+const time = Date.now() * 0.001;
+const textureOffset = Math.sin(time + platform.x * 0.01) * 2;
+```
+
+## Power-up Animation Patterns
+
+### Mushroom Animation
+- **Type**: Simple bobbing
+- **Frames**: 2-frame cycle (10 frames per change)
+- **Visual**: Vertical position offset
+
+### Fire Flower Animation  
+- **Type**: Color cycling
+- **Frames**: 4-color sequence (8 frames per change)
+- **Colors**: `['#FF4500', '#FF6347', '#FF0000', '#FFD700']`
+
+### Star Animation
+- **Type**: Fast spinning
+- **Frames**: 8-frame rotation (4 frames per change)
+- **Physics**: Combined with bouncing movement
+
+## Fireball Animation
+
+- **Rotation**: Continuous spinning based on animation frame
+- **Visual**: Dual-layer rendering (orange core, yellow center)
+- **Timing**: 4 frames per rotation step
+
+```javascript
+ctx.rotate((fireball.animationFrame * Math.PI) / 2);
+```
+
+## Animation Update System
+
+The main animation update function in [script.js](mdc:script.js):
+```javascript
+function updateAnimations() {
+    updatePlayerAnimation();
+    for (let enemy of enemies) updateEnemyAnimation(enemy);
+    for (let coin of coins) updateCoinAnimation(coin);
+    for (let powerUp of powerUps) updatePowerUpAnimation(powerUp);
+}
+```
+
+## Sprite Flipping Pattern
+
+Consistent sprite flipping for directional movement:
+```javascript
+if (player.direction === -1) {
+    ctx.scale(-1, 1);
+    ctx.translate(-player.x * 2 - player.width, 0);
+}
+```
+
+## Visual Effects Integration
+
+### Star Power Rainbow Effect
+```javascript
+if (player.starPower) {
+    const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3'];
+    player.color = colors[Math.floor(Date.now() / 100) % colors.length];
+}
+```
+
+### Invincibility Flashing
+```javascript
+if (player.invincible && !player.starPower && Math.floor(Date.now() / 100) % 2) {
+    ctx.globalAlpha = 0.5;
+}
+```
+
+## Performance Considerations
+
+### Frame-based Timing
+- All animations use game frame counters instead of time-based
+- Consistent 60 FPS animation regardless of performance
+- Efficient modulo operations for cycling
+
+### Animation State Management
+- State-aware animations (walking vs jumping vs idle)
+- Early returns for collected/inactive objects
+- Minimal computation per frame
+
+## Animation Extension Guidelines
+
+When adding new animations:
+
+1. **Follow the Standard Pattern**:
+   ```javascript
+   object.animationTimer++;
+   if (object.animationTimer >= frameDelay) {
+       object.animationFrame = (object.animationFrame + 1) % totalFrames;
+       object.animationTimer = 0;
+   }
+   ```
+
+2. **State-based Animation**: Check object state before applying animation
+3. **Consistent Timing**: Use frame-based timing for smooth 60 FPS
+4. **Visual Feedback**: Ensure animations provide clear gameplay feedback
+5. **Performance**: Avoid expensive operations in animation loops
+
+## Integration with Game Systems
+
+Animations integrate with:
+- **Physics System**: Movement affects animation state
+- **Collision System**: Collision events trigger animation changes  
+- **Particle System**: Animations coordinate with particle effects
+- **Sound System**: Animation events trigger sound effects
+- **Rendering Pipeline**: Animations modify drawing parameters

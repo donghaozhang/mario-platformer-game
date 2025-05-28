@@ -1,0 +1,134 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Game Development Patterns
+
+This document outlines the key patterns and practices used in the Mario game for consistent development.
+
+## Code Organization Patterns
+
+### Game Loop Pattern
+The main game loop in [script.js](mdc:script.js) follows the standard pattern:
+```javascript
+function gameLoop() {
+    handleInput();    // Process user input
+    updatePlayer();   // Update game state
+    updateEnemies();  // Update AI entities
+    updateParticles(); // Update visual effects
+    render();         // Draw everything
+    requestAnimationFrame(gameLoop); // Schedule next frame
+}
+```
+
+### Entity Component Pattern
+Each game object follows a consistent structure:
+- **Position**: x, y coordinates
+- **Dimensions**: width, height
+- **Physics**: velocityX, velocityY
+- **Visual**: color, type
+- **State**: collected, onGround, etc.
+
+### Collision Detection Pattern
+All collision checks use the same AABB function:
+```javascript
+function isColliding(rect1, rect2) {
+    return rect1.x < rect2.x + rect2.width &&
+           rect1.x + rect1.width > rect2.x &&
+           rect1.y < rect2.y + rect2.height &&
+           rect1.y + rect1.height > rect2.y;
+}
+```
+
+## Physics Implementation
+
+### Movement Physics
+- **Velocity-based movement**: Position updated by adding velocity
+- **Gravity application**: velocityY += gravity each frame
+- **Friction**: velocityX *= friction when no input
+- **Boundary checking**: Keep entities within canvas bounds
+
+### Collision Response
+- **Platform collision**: Separate position and zero velocity
+- **Enemy collision**: Check attack direction (top vs side)
+- **Coin collection**: Mark as collected and trigger effects
+
+## Visual Patterns
+
+### Canvas Rendering Order
+1. Clear canvas
+2. Draw background (gradient + clouds)
+3. Draw platforms (with texture)
+4. Draw coins (with shine effect)
+5. Draw enemies (with eyes)
+6. Draw player (multi-part sprite)
+7. Draw particles (effects)
+
+### Particle System
+- **Creation**: Generate particles at specific events
+- **Update**: Apply physics (gravity, velocity)
+- **Cleanup**: Remove particles when life expires
+- **Types**: Jump particles, death particles, coin particles
+
+## State Management
+
+### Game State Object
+Centralized state in `gameState` object:
+- score, lives, coins, level
+- gameRunning flag
+- keys object for input tracking
+
+### UI Updates
+Dedicated functions for UI synchronization:
+- `updateScore()`, `updateLives()`, `updateCoins()`
+- Direct DOM manipulation for real-time updates
+
+## Input Handling
+
+### Keyboard Input Pattern
+- **keydown**: Set key state to true
+- **keyup**: Set key state to false
+- **Frame-based checking**: Check key states in game loop
+- **Special keys**: Immediate actions (R for restart)
+
+## Performance Considerations
+
+### Efficient Loops
+- Use `for...of` for simple iteration
+- Use reverse loops when removing items: `for (let i = array.length - 1; i >= 0; i--)`
+- Early returns to avoid unnecessary processing
+
+### Memory Management
+- Reuse particle objects when possible
+- Clean up arrays by splicing removed items
+- Avoid creating new objects in game loop
+
+## Error Prevention
+
+### Bounds Checking
+- Always check array bounds before access
+- Validate collision detection inputs
+- Ensure canvas context exists before drawing
+
+### State Validation
+- Check `gameRunning` flag before updates
+- Validate player position and velocity
+- Handle edge cases (no platforms, no enemies)
+
+## Extension Patterns
+
+### Adding New Entities
+1. Create object with standard properties (x, y, width, height)
+2. Add to appropriate array (enemies, coins, etc.)
+3. Implement update logic
+4. Add collision detection
+5. Implement rendering
+
+### Adding New Mechanics
+1. Add state variables to relevant objects
+2. Implement update logic in appropriate function
+3. Add collision/interaction handling
+4. Update rendering if visual changes needed
+5. Add UI updates if score/stats affected
+

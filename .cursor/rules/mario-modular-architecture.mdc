@@ -1,0 +1,231 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Mario Game Modular Architecture
+
+This document outlines the modular JavaScript architecture used in the Mario game for maintainable and scalable development.
+
+## Architecture Overview
+
+The game is built using 8 focused JavaScript modules, each handling specific aspects of the game:
+
+```
+js/
+├── gameState.js    (56 lines)  - State management
+├── soundSystem.js  (170 lines) - Audio system
+├── levelSystem.js  (313 lines) - Level data & management
+├── physics.js      (261 lines) - Physics & collision
+├── particles.js    (92 lines)  - Visual effects
+├── animations.js   (119 lines) - Sprite animations
+├── renderer.js     (461 lines) - Rendering system
+└── main.js         (274 lines) - Game loop & core
+```
+
+**Total: 1,746 lines** (down from 1,400+ line monolithic file)
+
+## Module Dependencies
+
+### Loading Order (Critical)
+Modules must be loaded in this exact order in `index.html`:
+1. `gameState.js` - Provides global variables
+2. `soundSystem.js` - Audio system
+3. `levelSystem.js` - Level data
+4. `physics.js` - Physics engine
+5. `particles.js` - Particle effects
+6. `animations.js` - Animation system
+7. `renderer.js` - Rendering functions
+8. `main.js` - Game loop (starts the game)
+
+### Inter-Module Communication
+- **Global Variables**: Shared through `gameState.js`
+- **Function Calls**: Direct function calls between modules
+- **Event System**: Keyboard events handled in `main.js`
+- **State Updates**: Centralized in `gameState` object
+
+## Module Responsibilities
+
+### 1. gameState.js - State Management
+**Purpose**: Centralized state and global variables
+**Key Objects**:
+- `gameState` - Game state (score, lives, level, keys)
+- `player` - Player object with all properties
+- `canvas`, `ctx` - Canvas references
+- Physics constants (`gravity`, `friction`)
+
+**Global Arrays**:
+```javascript
+let platforms = [];
+let enemies = [];
+let coins = [];
+let particles = [];
+let powerUps = [];
+let movingPlatforms = [];
+let breakableBlocks = [];
+let secretAreas = [];
+```
+
+### 2. soundSystem.js - Audio System
+**Purpose**: Complete Web Audio API sound system
+**Key Functions**:
+- `initSounds()` - Initialize all sounds
+- `playSound(soundName)` - Play specific sound
+- `toggleSound()` - Toggle sound on/off
+- `createBeepSound()` - Generate beep sounds
+
+**Sound Types**:
+- Background music (looping C major scale)
+- Jump, coin, enemy defeat, game over sounds
+- Level complete melody
+
+### 3. levelSystem.js - Level Management
+**Purpose**: Level data and interactive elements
+**Key Features**:
+- 3 unique levels with different themes
+- Moving platforms with boundaries
+- Breakable blocks
+- Secret areas with bonus coins
+
+**Key Functions**:
+- `createLevel()` - Load level data
+- `updateMovingPlatforms()` - Update platform movement
+- `checkBreakableBlocks()` - Handle block breaking
+- `checkSecretAreas()` - Discover secret areas
+
+### 4. physics.js - Physics Engine
+**Purpose**: Physics simulation and collision detection
+**Key Functions**:
+- `isColliding()` - AABB collision detection
+- `updatePlayer()` - Player physics update
+- `checkPlatformCollisions()` - Platform interactions
+- `checkEnemyCollisions()` - Enemy interactions
+- `applyPowerUp()` - Power-up effects
+- `takeDamage()` - Damage system
+
+**Power-up System**:
+- Mushroom: Grow Mario
+- Fire Flower: Enable fireballs
+- Star: Invincibility with rainbow effect
+
+### 5. particles.js - Visual Effects
+**Purpose**: Particle system for visual feedback
+**Particle Types**:
+- Jump particles (white)
+- Death particles (red)
+- Coin particles (gold)
+- Power-up particles (type-specific colors)
+- Block break particles (brown)
+- Secret area particles (rainbow)
+
+**Key Functions**:
+- `createJumpParticles()` - Jump feedback
+- `createDeathParticles()` - Enemy death
+- `createCoinParticles()` - Coin collection
+- `createPowerUpParticles()` - Power-up collection
+
+### 6. animations.js - Animation System
+**Purpose**: Frame-based sprite animations
+**Animation Types**:
+- Player: Walking (4 frames), jumping, idle
+- Enemies: Bouncing walk (2 frames), directional eyes
+- Coins: 3D spinning (8 frames)
+- Power-ups: Type-specific animations
+
+**Key Functions**:
+- `updateAnimations()` - Update all animations
+- `updatePlayerAnimation()` - Player state-based animation
+- `updateEnemyAnimation()` - Enemy movement animation
+- `updateCoinAnimation()` - Coin spinning effect
+
+### 7. renderer.js - Rendering System
+**Purpose**: Complete graphics rendering
+**Rendering Order**:
+1. Background (gradient + clouds)
+2. Platforms (with textures)
+3. Moving platforms (with glow)
+4. Breakable blocks
+5. Coins (3D spinning)
+6. Enemies (animated sprites)
+7. Power-ups (animated)
+8. Player (detailed sprite)
+9. Fireballs
+10. Particles
+
+**Key Functions**:
+- `render()` - Main render function
+- `drawPlayer()` - Detailed player sprite
+- `drawAnimatedCoin()` - 3D coin effect
+- `drawAnimatedEnemy()` - Enemy sprites
+- `drawBackground()` - Sky and clouds
+
+### 8. main.js - Game Loop & Core
+**Purpose**: Main game loop and core functionality
+**Key Functions**:
+- `init()` - Game initialization
+- `gameLoop()` - 60 FPS main loop
+- `handleInput()` - Keyboard input processing
+- `restartGame()` - Game reset
+- `levelComplete()` - Level progression
+- `updateFireballs()` - Fireball physics
+
+**Game Loop Sequence**:
+```javascript
+function gameLoop() {
+    handleInput();        // Process input
+    updateAnimations();   // Update sprites
+    updatePlayer();       // Player physics
+    updateEnemies();      // Enemy AI
+    updateMovingPlatforms(); // Platform movement
+    updateFireballs();    // Fireball physics
+    updateParticles();    // Particle effects
+    render();            // Draw everything
+    requestAnimationFrame(gameLoop); // Next frame
+}
+```
+
+## Development Guidelines
+
+### Adding New Features
+1. **Identify the appropriate module** for the feature
+2. **Add state variables** to `gameState.js` if needed
+3. **Implement logic** in the relevant module
+4. **Add rendering** in `renderer.js`
+5. **Update animations** in `animations.js` if visual
+6. **Add sound effects** in `soundSystem.js` if needed
+
+### Module Communication Patterns
+- **State Access**: Use global `gameState` object
+- **Function Calls**: Direct calls between modules
+- **Data Sharing**: Through global arrays in `gameState.js`
+- **Event Handling**: Centralized in `main.js`
+
+### Performance Considerations
+- **Modular Loading**: Scripts load in sequence
+- **Function Scope**: Functions are global for inter-module access
+- **Memory Management**: Centralized array cleanup
+- **Rendering Optimization**: Single render pass in `renderer.js`
+
+### Code Organization Benefits
+- **Maintainability**: Each module has clear responsibility
+- **Debugging**: Easier to locate issues
+- **Collaboration**: Multiple developers can work on different modules
+- **Testing**: Individual modules can be tested separately
+- **Scalability**: Easy to add new features to appropriate modules
+
+## Extension Patterns
+
+### Adding New Game Objects
+1. Add array to `gameState.js`
+2. Add creation logic to `levelSystem.js`
+3. Add physics in `physics.js`
+4. Add rendering in `renderer.js`
+5. Add animations in `animations.js`
+
+### Adding New Systems
+1. Create new module file
+2. Add to loading order in `index.html`
+3. Initialize in `main.js`
+4. Integrate with game loop
+
+This modular architecture provides a solid foundation for continued development while maintaining code quality and organization.

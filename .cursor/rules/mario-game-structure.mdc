@@ -1,0 +1,120 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Mario Game Project Structure
+
+This is a complete HTML5 Mario-style platformer game built with modular JavaScript architecture, HTML, and CSS.
+
+## Core Files
+
+- **[index.html](mdc:index.html)** - Main HTML file containing the game canvas, UI elements, and script loading
+- **[style.css](mdc:style.css)** - Modern styling with responsive design and animations
+- **[README.md](mdc:README.md)** - Game documentation and instructions
+- **[agent.md](mdc:agent.md)** - Development documentation and task tracking
+
+## Modular JavaScript Architecture (8 Modules)
+
+### State Management
+- **[js/gameState.js](mdc:js/gameState.js)** (56 lines) - Game state, player object, global variables, physics constants
+
+### Systems
+- **[js/soundSystem.js](mdc:js/soundSystem.js)** (170 lines) - Web Audio API sound system with background music and effects
+- **[js/levelSystem.js](mdc:js/levelSystem.js)** (313 lines) - 3 unique level definitions, moving platforms, breakable blocks, secret areas
+- **[js/physics.js](mdc:js/physics.js)** (261 lines) - Physics engine, AABB collision detection, power-up mechanics, damage system
+- **[js/particles.js](mdc:js/particles.js)** (92 lines) - Particle effects system for visual feedback
+- **[js/animations.js](mdc:js/animations.js)** (119 lines) - Frame-based animation system for sprites and effects
+
+### Rendering & Core
+- **[js/renderer.js](mdc:js/renderer.js)** (461 lines) - Complete rendering system with animated sprites and 3D effects
+- **[js/main.js](mdc:js/main.js)** (274 lines) - Main game loop, input handling, initialization, game state management
+
+## Game Architecture
+
+### Key Objects across modules:
+- `gameState` - Global game state including score, lives, level, keys
+- `player` - Mario character with position, velocity, power-up state, animations
+- `platforms[]` - Array of platform objects for collision detection
+- `enemies[]` - Array of Goomba enemies with AI movement and animations
+- `coins[]` - Array of collectible coins with 3D spinning effects
+- `particles[]` - Visual effects system for feedback
+- `powerUps[]` - Array of power-up objects (mushroom, fire flower, star)
+- `movingPlatforms[]` - Array of moving platform objects
+- `breakableBlocks[]` - Array of breakable block objects
+- `secretAreas[]` - Array of hidden areas with bonus coins
+
+### Core Functions by Module:
+**gameState.js**: Global variables and constants
+**soundSystem.js**: `initSounds()`, `playSound()`, `toggleSound()`, `createBeepSound()`
+**levelSystem.js**: `createLevel()`, `updateMovingPlatforms()`, `checkBreakableBlocks()`, `checkSecretAreas()`
+**physics.js**: `isColliding()`, `updatePlayer()`, `checkCollisions()`, `applyPowerUp()`, `takeDamage()`
+**particles.js**: `createJumpParticles()`, `createDeathParticles()`, `createCoinParticles()`
+**animations.js**: `updateAnimations()`, `updatePlayerAnimation()`, `updateEnemyAnimation()`
+**renderer.js**: `render()`, `drawPlayer()`, `drawEnemies()`, `drawCoins()`, `drawBackground()`
+**main.js**: `init()`, `gameLoop()`, `handleInput()`, `restartGame()`, `levelComplete()`
+
+## Game Mechanics
+
+### Physics Constants:
+- `gravity: 0.6` - Downward acceleration
+- `friction: 0.85` - Movement deceleration
+- `player.speed: 3` - Horizontal movement speed
+- `player.jumpPower: 12` - Jump velocity
+
+### Controls:
+- Arrow Keys: Left/Right movement
+- Spacebar: Jump
+- R Key: Restart game
+
+## Styling Architecture in [style.css](mdc:style.css):
+
+### Key Classes:
+- `.game-container` - Main game wrapper with modern styling
+- `.score-board` - HUD display for score, lives, coins
+- `.game-over`, `.level-complete` - Modal overlays
+- `@media` queries for responsive design
+
+## Development Guidelines
+
+1. **Performance**: Game runs at 60 FPS using requestAnimationFrame
+2. **Collision Detection**: Uses AABB (Axis-Aligned Bounding Box) method
+3. **State Management**: Centralized in gameState object
+4. **Visual Effects**: Particle system for feedback
+5. **Responsive**: Canvas scales on mobile devices
+6. **Sound System**: Web Audio API for browser-compatible sounds
+7. **Animation System**: Frame-based animations for consistent 60 FPS
+8. **Power-ups**: Comprehensive power-up system with state management
+
+## Recent Major Features
+
+### Power-ups System ✅
+- **Mushroom**: Grows Mario, provides extra hit protection
+- **Fire Flower**: Enables fireball shooting with X key
+- **Star**: 10 seconds of invincibility with rainbow effects
+- **Damage System**: Proper downgrade hierarchy (Fire→Big→Small→Death)
+
+### Enhanced Animations ✅
+- **Player**: 4-frame walking, jumping, idle animations with sprite flipping
+- **Enemies**: Bouncing walk cycles with directional eyes and blinking
+- **Coins**: 8-frame 3D spinning effect with floating motion
+- **Platforms**: Animated textures with grass and brick patterns
+
+### Sound System ✅
+- **Web Audio API**: Browser-compatible sound generation
+- **Background Music**: Looping C major scale melody
+- **Sound Effects**: Jump, coin, enemy defeat, game over, level complete
+- **Controls**: M key and button toggle, visual feedback
+
+## Common Modifications
+
+- **Speed Adjustments**: Modify player.speed, gravity, and enemy velocityX values
+- **Level Design**: Edit platforms array in createLevel()
+- **New Enemies**: Add to enemies array with position and velocity
+- **Visual Changes**: Update drawing functions in render section
+- **Game Mechanics**: Modify collision detection and physics functions
+- **Power-ups**: Add new types in powerUps array and applyPowerUp() function
+- **Animations**: Follow frame-based timing pattern in updateAnimations()
+- **Sounds**: Use createBeepSound() pattern for new audio effects
+
+

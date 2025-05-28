@@ -1,0 +1,228 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Mario Sound System Guide
+
+This rule documents the Web Audio API-based sound system implemented in the Mario game, including sound generation, management, and integration patterns.
+
+## Sound System Architecture
+
+The sound system in [script.js](mdc:script.js) uses Web Audio API for browser-compatible sound generation without external files.
+
+### Sound Object Structure
+```javascript
+const sounds = {
+    jump: function,           // Player jump sound
+    coin: function,           // Coin collection sound  
+    enemyDefeat: function,    // Enemy destruction sound
+    gameOver: function,       // Game over sound
+    levelComplete: function,  // Level completion melody
+    backgroundMusic: object   // Looping background music
+};
+```
+
+## Sound Generation Patterns
+
+### Basic Beep Sound Creation
+```javascript
+function createBeepSound(frequency, duration, waveType = 'sine') {
+    return function() {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = frequency;
+        oscillator.type = waveType;
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + duration);
+    };
+}
+```
+
+## Sound Types and Properties
+
+### Jump Sound 🎵
+- **Frequency**: 220 Hz
+- **Duration**: 0.1 seconds
+- **Wave Type**: Square wave
+- **Trigger**: Spacebar press when on ground
+
+### Coin Collection Sound 🪙
+- **Frequency**: 440 Hz  
+- **Duration**: 0.2 seconds
+- **Wave Type**: Sine wave
+- **Trigger**: Player-coin collision
+
+### Enemy Defeat Sound ⚔️
+- **Frequency**: 330 Hz
+- **Duration**: 0.15 seconds  
+- **Wave Type**: Sawtooth wave
+- **Trigger**: Enemy destruction (jump or fireball)
+
+### Game Over Sound 💀
+- **Frequency**: 110 Hz
+- **Duration**: 0.5 seconds
+- **Wave Type**: Triangle wave
+- **Trigger**: Player death with no lives remaining
+
+### Level Complete Sound 🎉
+- **Type**: Melody sequence
+- **Notes**: [262, 330, 392, 523] Hz (C major chord progression)
+- **Duration**: 0.3 seconds per note
+- **Trigger**: All coins collected
+
+## Background Music System
+
+### Looping Music Pattern
+```javascript
+const melody = [262, 294, 330, 349, 392, 440, 494, 523]; // C major scale
+let currentNote = 0;
+
+// Plays notes in sequence with 600ms intervals
+setInterval(() => {
+    // Play current note
+    currentNote = (currentNote + 1) % melody.length;
+}, 600);
+```
+
+### Music Control Methods
+- `sounds.backgroundMusic.play()` - Start background music
+- `sounds.backgroundMusic.stop()` - Stop background music
+- Automatic restart on game restart
+
+## Sound Control System
+
+### Global Sound Toggle
+```javascript
+let soundEnabled = true;
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    // Update UI button text
+    // Control background music
+}
+```
+
+### Sound Playing Function
+```javascript
+function playSound(soundName) {
+    if (!soundEnabled) return;
+    
+    if (sounds[soundName] && typeof sounds[soundName] === 'function') {
+        sounds[soundName]();
+    } else if (sounds[soundName] && sounds[soundName].play) {
+        sounds[soundName].play();
+    }
+}
+```
+
+## UI Integration
+
+### Sound Toggle Button
+Located in [index.html](mdc:index.html):
+```html
+<button id="soundToggle" onclick="toggleSound()">🔊 Sound ON</button>
+```
+
+### Keyboard Controls
+- **M Key**: Toggle sound on/off
+- **Visual Feedback**: Button text changes between "🔊 Sound ON" and "🔇 Sound OFF"
+
+## Error Handling
+
+### Browser Compatibility
+```javascript
+try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    // Audio code
+} catch (e) {
+    console.log('Audio not supported');
+}
+```
+
+### Graceful Degradation
+- Game continues to function without sound
+- No errors thrown if Web Audio API unavailable
+- Silent fallback for unsupported browsers
+
+## Sound Event Integration
+
+### Game Event Triggers
+- **Player Actions**: Jump, fireball shooting
+- **Collision Events**: Coin collection, enemy defeat, power-up collection
+- **Game State Changes**: Level complete, game over, restart
+- **Background**: Continuous music during gameplay
+
+### Timing Considerations
+- **Immediate Sounds**: Jump, collision effects
+- **Delayed Sounds**: Background music starts 1 second after init
+- **State-dependent**: Music stops on game over/level complete
+
+## Performance Optimization
+
+### Audio Context Management
+- New AudioContext created per sound (avoids context limits)
+- Automatic cleanup when sounds complete
+- No persistent audio objects (memory efficient)
+
+### Rate Limiting
+- Fireball sounds limited to prevent audio spam
+- Background music prevents overlapping instances
+
+## Extension Guidelines
+
+### Adding New Sounds
+
+1. **Create Sound Function**:
+   ```javascript
+   sounds.newSound = createBeepSound(frequency, duration, waveType);
+   ```
+
+2. **Add Trigger Logic**:
+   ```javascript
+   // In appropriate game event
+   playSound('newSound');
+   ```
+
+3. **Consider Timing**: Ensure sound fits game event timing
+
+### Complex Sound Patterns
+
+For melody sequences:
+```javascript
+function createMelodySound(frequencies, noteDuration) {
+    return function() {
+        frequencies.forEach((freq, index) => {
+            // Schedule each note with timing offset
+            const startTime = audioContext.currentTime + (index * noteDuration);
+        });
+    };
+}
+```
+
+## Integration with Game Systems
+
+### Game Loop Integration
+- Sound calls integrated into collision detection
+- Background music managed in game state functions
+- Sound state persists through game restarts
+
+### UI Synchronization  
+- Sound toggle button reflects current state
+- Visual feedback matches audio state
+- Keyboard shortcuts for accessibility
+
+### State Management
+- Sound enabled state tracked globally
+- Background music controlled by game running state
+- Proper cleanup on game over/restart
+
