@@ -1,8 +1,13 @@
 // Main game file - contains game loop, input handling, and core functions
 
 // Initialize game
-function init() {
+async function init() {
     loadHighScore(); // Load saved high score
+    
+    // Initialize assets first
+    console.log('Loading game assets...');
+    await initAssets();
+    
     initSounds();
     createLevel();
     gameLoop();
