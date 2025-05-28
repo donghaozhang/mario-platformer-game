@@ -151,8 +151,7 @@ function loseLife() {
         gameOver();
     } else {
         // Reset player position
-        player.x = 50;
-        player.y = 300;
+        player.setPosition(50, 300);
         player.velocityX = 0;
         player.velocityY = 0;
     }
@@ -202,21 +201,7 @@ function restartGame() {
     gameState.gameRunning = true;
     
     // Reset player
-    player.x = 50;
-    player.y = 300;
-    player.velocityX = 0;
-    player.velocityY = 0;
-    player.onGround = false;
-    player.powerUpState = 'small';
-    player.height = player.originalHeight;
-    player.speed = 3;
-    player.jumpPower = 12;
-    player.color = '#FF0000';
-    player.invincible = false;
-    player.invincibleTimer = 0;
-    player.starPower = false;
-    player.starTimer = 0;
-    player.fireballs = [];
+    player.reset();
     
     // Reset level
     createLevel();
@@ -249,8 +234,7 @@ function nextLevel() {
     gameState.gameRunning = true;
     
     // Reset player position
-    player.x = 50;
-    player.y = 300;
+    player.setPosition(50, 300);
     player.velocityX = 0;
     player.velocityY = 0;
     player.onGround = false;
