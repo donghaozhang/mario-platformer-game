@@ -9,11 +9,12 @@ This document outlines the modular JavaScript architecture used in the Mario gam
 
 ## Architecture Overview
 
-The game is built using 8 focused JavaScript modules, each handling specific aspects of the game:
+The game is built using 9 focused JavaScript modules, each handling specific aspects of the game:
 
 ```
 js/
 ├── gameState.js    (56 lines)  - State management
+├── assetLoader.js  (87 lines)  - Placeholder asset loader
 ├── soundSystem.js  (170 lines) - Audio system
 ├── levelSystem.js  (313 lines) - Level data & management
 ├── physics.js      (261 lines) - Physics & collision
@@ -23,20 +24,21 @@ js/
 └── main.js         (274 lines) - Game loop & core
 ```
 
-**Total: 1,746 lines** (down from 1,400+ line monolithic file)
+**Total: 2,743 lines** (down from 1,400+ line monolithic file)
 
 ## Module Dependencies
 
 ### Loading Order (Critical)
 Modules must be loaded in this exact order in `index.html`:
 1. `gameState.js` - Provides global variables
-2. `soundSystem.js` - Audio system
-3. `levelSystem.js` - Level data
-4. `physics.js` - Physics engine
-5. `particles.js` - Particle effects
-6. `animations.js` - Animation system
-7. `renderer.js` - Rendering functions
-8. `main.js` - Game loop (starts the game)
+2. `assetLoader.js` - Creates placeholder assets
+3. `soundSystem.js` - Audio system
+4. `levelSystem.js` - Level data
+5. `physics.js` - Physics engine
+6. `particles.js` - Particle effects
+7. `animations.js` - Animation system
+8. `renderer.js` - Rendering functions
+9. `main.js` - Game loop (starts the game)
 
 ### Inter-Module Communication
 - **Global Variables**: Shared through `gameState.js`
@@ -66,7 +68,14 @@ let breakableBlocks = [];
 let secretAreas = [];
 ```
 
-### 2. soundSystem.js - Audio System
+### 2. assetLoader.js - Asset Loader
+**Purpose**: Creates placeholder graphics and initializes assets
+**Key Functions**:
+- `initAssets()` - Load placeholder assets
+- `getAsset(key)` - Retrieve an asset by key
+- `areAssetsLoaded()` - Check loading status
+
+### 3. soundSystem.js - Audio System
 **Purpose**: Complete Web Audio API sound system
 **Key Functions**:
 - `initSounds()` - Initialize all sounds
@@ -79,7 +88,7 @@ let secretAreas = [];
 - Jump, coin, enemy defeat, game over sounds
 - Level complete melody
 
-### 3. levelSystem.js - Level Management
+### 4. levelSystem.js - Level Management
 **Purpose**: Level data and interactive elements
 **Key Features**:
 - 3 unique levels with different themes
@@ -93,7 +102,7 @@ let secretAreas = [];
 - `checkBreakableBlocks()` - Handle block breaking
 - `checkSecretAreas()` - Discover secret areas
 
-### 4. physics.js - Physics Engine
+### 5. physics.js - Physics Engine
 **Purpose**: Physics simulation and collision detection
 **Key Functions**:
 - `isColliding()` - AABB collision detection
@@ -108,7 +117,7 @@ let secretAreas = [];
 - Fire Flower: Enable fireballs
 - Star: Invincibility with rainbow effect
 
-### 5. particles.js - Visual Effects
+### 6. particles.js - Visual Effects
 **Purpose**: Particle system for visual feedback
 **Particle Types**:
 - Jump particles (white)
@@ -124,7 +133,7 @@ let secretAreas = [];
 - `createCoinParticles()` - Coin collection
 - `createPowerUpParticles()` - Power-up collection
 
-### 6. animations.js - Animation System
+### 7. animations.js - Animation System
 **Purpose**: Frame-based sprite animations
 **Animation Types**:
 - Player: Walking (4 frames), jumping, idle
@@ -138,7 +147,7 @@ let secretAreas = [];
 - `updateEnemyAnimation()` - Enemy movement animation
 - `updateCoinAnimation()` - Coin spinning effect
 
-### 7. renderer.js - Rendering System
+### 8. renderer.js - Rendering System
 **Purpose**: Complete graphics rendering
 **Rendering Order**:
 1. Background (gradient + clouds)
@@ -159,7 +168,7 @@ let secretAreas = [];
 - `drawAnimatedEnemy()` - Enemy sprites
 - `drawBackground()` - Sky and clouds
 
-### 8. main.js - Game Loop & Core
+### 9. main.js - Game Loop & Core
 **Purpose**: Main game loop and core functionality
 **Key Functions**:
 - `init()` - Game initialization

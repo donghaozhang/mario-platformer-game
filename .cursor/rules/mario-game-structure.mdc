@@ -14,12 +14,13 @@ This is a complete HTML5 Mario-style platformer game built with modular JavaScri
 - **[README.md](mdc:README.md)** - Game documentation and instructions
 - **[agent.md](mdc:agent.md)** - Development documentation and task tracking
 
-## Modular JavaScript Architecture (8 Modules)
+## Modular JavaScript Architecture (9 Modules)
 
 ### State Management
 - **[js/gameState.js](mdc:js/gameState.js)** (56 lines) - Game state, player object, global variables, physics constants
 
 ### Systems
+- **[js/assetLoader.js](mdc:js/assetLoader.js)** (87 lines) - Placeholder asset loading system
 - **[js/soundSystem.js](mdc:js/soundSystem.js)** (170 lines) - Web Audio API sound system with background music and effects
 - **[js/levelSystem.js](mdc:js/levelSystem.js)** (313 lines) - 3 unique level definitions, moving platforms, breakable blocks, secret areas
 - **[js/physics.js](mdc:js/physics.js)** (261 lines) - Physics engine, AABB collision detection, power-up mechanics, damage system
@@ -46,6 +47,7 @@ This is a complete HTML5 Mario-style platformer game built with modular JavaScri
 
 ### Core Functions by Module:
 **gameState.js**: Global variables and constants
+**assetLoader.js**: `initAssets()`, `getAsset()`, `areAssetsLoaded()`
 **soundSystem.js**: `initSounds()`, `playSound()`, `toggleSound()`, `createBeepSound()`
 **levelSystem.js**: `createLevel()`, `updateMovingPlatforms()`, `checkBreakableBlocks()`, `checkSecretAreas()`
 **physics.js**: `isColliding()`, `updatePlayer()`, `checkCollisions()`, `applyPowerUp()`, `takeDamage()`
