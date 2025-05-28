@@ -448,11 +448,20 @@ function drawKoopa(enemy) {
     ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height, enemy.width/2 - 2, 3, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Shell (main body)
+    // Feet (yellow, drawn first so they appear behind body)
+    ctx.fillStyle = '#FFD700';
+    const footOffset = walkFrame < 2 ? 0 : 2;
+    
+    // Left foot
+    ctx.fillRect(enemy.x + 4 + footOffset, enemy.y + enemy.height - 6, 6, 6);
+    // Right foot  
+    ctx.fillRect(enemy.x + enemy.width - 10 - footOffset, enemy.y + enemy.height - 6, 6, 6);
+    
+    // Shell (main body) - more dome-shaped
     const shellGradient = ctx.createRadialGradient(
-        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2,
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2,
         0,
-        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2,
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2,
         enemy.width/2
     );
     shellGradient.addColorStop(0, '#32CD32');
@@ -460,142 +469,187 @@ function drawKoopa(enemy) {
     shellGradient.addColorStop(1, '#006400');
     ctx.fillStyle = shellGradient;
     
-    // Shell shape
+    // Shell body (more rounded/dome-like)
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 4 + bobAmount, 
-                enemy.width/2 - 2, enemy.height/3, 0, 0, Math.PI * 2);
+    ctx.moveTo(enemy.x + 2, enemy.y + enemy.height - 6);
+    ctx.quadraticCurveTo(enemy.x + 2, enemy.y + 8, enemy.x + enemy.width/2, enemy.y + 6);
+    ctx.quadraticCurveTo(enemy.x + enemy.width - 2, enemy.y + 8, enemy.x + enemy.width - 2, enemy.y + enemy.height - 6);
+    ctx.closePath();
     ctx.fill();
     
-    // Shell rim
-    ctx.strokeStyle = '#FFFF00';
+    // Shell belly (lighter green)
+    ctx.fillStyle = '#90EE90';
+    ctx.fillRect(enemy.x + 4, enemy.y + enemy.height - 10, enemy.width - 8, 4);
+    
+    // Shell pattern (hexagon segments)
+    ctx.strokeStyle = '#006400';
     ctx.lineWidth = 2;
+    // Center line
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 4 + bobAmount, 
-                enemy.width/2 - 2, enemy.height/3, 0, 0, Math.PI * 2);
+    ctx.moveTo(enemy.x + enemy.width/2, enemy.y + 8);
+    ctx.lineTo(enemy.x + enemy.width/2, enemy.y + enemy.height - 10);
+    ctx.stroke();
+    // Side segments
+    ctx.beginPath();
+    ctx.moveTo(enemy.x + 8, enemy.y + 12);
+    ctx.lineTo(enemy.x + 8, enemy.y + enemy.height - 10);
+    ctx.moveTo(enemy.x + enemy.width - 8, enemy.y + 12);
+    ctx.lineTo(enemy.x + enemy.width - 8, enemy.y + enemy.height - 10);
     ctx.stroke();
     
-    // Head (yellow-green)
+    // Head (bald, yellow-green)
     ctx.fillStyle = '#9ACD32';
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/3 + bobAmount, 
-                enemy.width/3, enemy.height/4, 0, 0, Math.PI * 2);
+    ctx.arc(enemy.x + enemy.width/2 - 5, enemy.y + 12 + bobAmount, 8, 0, Math.PI * 2);
     ctx.fill();
     
-    // Beak
-    ctx.fillStyle = '#FFD700';
-    ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2 - 8, enemy.y + enemy.height/3 + bobAmount, 
-                4, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Eye
+    // Eye (white with black pupil)
     ctx.fillStyle = '#FFFFFF';
     ctx.beginPath();
-    ctx.arc(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/3 - 2 + bobAmount, 4, 0, Math.PI * 2);
+    ctx.ellipse(enemy.x + enemy.width/2 - 2, enemy.y + 10 + bobAmount, 4, 5, 0, 0, Math.PI * 2);
     ctx.fill();
+    
+    // Eye outline
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2 - 2, enemy.y + 10 + bobAmount, 4, 5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Pupil
     ctx.fillStyle = '#000000';
     ctx.beginPath();
-    ctx.arc(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/3 - 2 + bobAmount, 2, 0, Math.PI * 2);
+    ctx.arc(enemy.x + enemy.width/2 - 1, enemy.y + 11 + bobAmount, 2, 0, Math.PI * 2);
     ctx.fill();
     
-    // Feet (yellow)
+    // Beak/mouth
     ctx.fillStyle = '#FFD700';
-    const footOffset = walkFrame < 2 ? 0 : 2;
-    
-    // Left foot
     ctx.beginPath();
-    ctx.ellipse(enemy.x + 6 + footOffset, enemy.y + enemy.height - 3, 5, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Right foot
-    ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width - 6 - footOffset, enemy.y + enemy.height - 3, 5, 3, 0, 0, Math.PI * 2);
+    ctx.moveTo(enemy.x + enemy.width/2 - 12, enemy.y + 14 + bobAmount);
+    ctx.lineTo(enemy.x + enemy.width/2 - 15, enemy.y + 16 + bobAmount);
+    ctx.lineTo(enemy.x + enemy.width/2 - 12, enemy.y + 18 + bobAmount);
+    ctx.closePath();
     ctx.fill();
 }
 
 function drawFlyingEnemy(enemy) {
-    const wingFlap = Math.sin(Date.now() * 0.03) * 8;
+    const wingFlap = Math.sin(Date.now() * 0.03) * 10;
     const floatOffset = Math.sin(Date.now() * 0.005) * 2;
     
     // Shadow (smaller and offset for flying)
     ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height + 8, enemy.width/3, 2, 0, 0, Math.PI * 2);
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height + 10, enemy.width/3, 2, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Main body (red shell)
-    const bodyGradient = ctx.createRadialGradient(
-        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset,
-        0,
-        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset,
-        enemy.width/2
-    );
-    bodyGradient.addColorStop(0, '#FF6347');
-    bodyGradient.addColorStop(0.7, '#DC143C');
-    bodyGradient.addColorStop(1, '#8B0000');
-    ctx.fillStyle = bodyGradient;
+    // Feet (yellow, tucked up while flying)
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(enemy.x + 6, enemy.y + enemy.height - 4 + floatOffset, 4, 4);
+    ctx.fillRect(enemy.x + enemy.width - 10, enemy.y + enemy.height - 4 + floatOffset, 4, 4);
     
-    // Body
-    ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2 + floatOffset, 
-                enemy.width/2 - 2, enemy.height/3, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Shell rim
-    ctx.strokeStyle = '#FFFF00';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2 + floatOffset, 
-                enemy.width/2 - 2, enemy.height/3, 0, 0, Math.PI * 2);
-    ctx.stroke();
-    
-    // Wings (simple white)
+    // Wings (drawn behind body)
     ctx.fillStyle = '#FFFFFF';
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 1;
     
     // Left wing
     ctx.save();
-    ctx.translate(enemy.x + 2, enemy.y + enemy.height/3 + floatOffset);
-    ctx.rotate(wingFlap * 0.02);
+    ctx.translate(enemy.x + 4, enemy.y + 8 + floatOffset);
+    ctx.rotate(Math.sin(wingFlap * 0.1) * 0.3);
     ctx.beginPath();
-    ctx.ellipse(0, 0, 8, 4, -0.5, 0, Math.PI * 2);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-10, -5);
+    ctx.lineTo(-12, 0);
+    ctx.lineTo(-10, 5);
+    ctx.lineTo(-5, 8);
+    ctx.closePath();
     ctx.fill();
     ctx.stroke();
     ctx.restore();
     
     // Right wing
     ctx.save();
-    ctx.translate(enemy.x + enemy.width - 2, enemy.y + enemy.height/3 + floatOffset);
-    ctx.rotate(-wingFlap * 0.02);
+    ctx.translate(enemy.x + enemy.width - 4, enemy.y + 8 + floatOffset);
+    ctx.rotate(-Math.sin(wingFlap * 0.1) * 0.3);
     ctx.beginPath();
-    ctx.ellipse(0, 0, 8, 4, 0.5, 0, Math.PI * 2);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(10, -5);
+    ctx.lineTo(12, 0);
+    ctx.lineTo(10, 5);
+    ctx.lineTo(5, 8);
+    ctx.closePath();
     ctx.fill();
     ctx.stroke();
     ctx.restore();
     
-    // Head
+    // Shell (main body) - red for Paratroopa
+    const shellGradient = ctx.createRadialGradient(
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset,
+        0,
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset,
+        enemy.width/2
+    );
+    shellGradient.addColorStop(0, '#FF6347');
+    shellGradient.addColorStop(0.7, '#DC143C');
+    shellGradient.addColorStop(1, '#8B0000');
+    ctx.fillStyle = shellGradient;
+    
+    // Shell body
+    ctx.beginPath();
+    ctx.moveTo(enemy.x + 2, enemy.y + enemy.height - 6 + floatOffset);
+    ctx.quadraticCurveTo(enemy.x + 2, enemy.y + 8 + floatOffset, enemy.x + enemy.width/2, enemy.y + 6 + floatOffset);
+    ctx.quadraticCurveTo(enemy.x + enemy.width - 2, enemy.y + 8 + floatOffset, enemy.x + enemy.width - 2, enemy.y + enemy.height - 6 + floatOffset);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Shell belly (lighter red)
+    ctx.fillStyle = '#FFA07A';
+    ctx.fillRect(enemy.x + 4, enemy.y + enemy.height - 10 + floatOffset, enemy.width - 8, 4);
+    
+    // Shell pattern
+    ctx.strokeStyle = '#8B0000';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(enemy.x + enemy.width/2, enemy.y + 8 + floatOffset);
+    ctx.lineTo(enemy.x + enemy.width/2, enemy.y + enemy.height - 10 + floatOffset);
+    ctx.stroke();
+    
+    // Head (yellow-green like regular Koopa)
     ctx.fillStyle = '#9ACD32';
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/3 - 2 + floatOffset, 
-                enemy.width/3, enemy.height/4, 0, 0, Math.PI * 2);
+    ctx.arc(enemy.x + enemy.width/2 - 5, enemy.y + 12 + floatOffset, 8, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Aviator goggles
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(enemy.x + 2, enemy.y + 10 + floatOffset);
+    ctx.lineTo(enemy.x + enemy.width - 8, enemy.y + 10 + floatOffset);
+    ctx.stroke();
+    
+    // Goggle lenses
+    ctx.fillStyle = '#87CEEB';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(enemy.x + enemy.width/2 - 2, enemy.y + 10 + floatOffset, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Goggle reflection
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.beginPath();
+    ctx.arc(enemy.x + enemy.width/2 - 3, enemy.y + 9 + floatOffset, 1.5, 0, Math.PI * 2);
     ctx.fill();
     
     // Beak
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2 - 8, enemy.y + enemy.height/3 - 2 + floatOffset, 
-                4, 3, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Eye
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.arc(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/3 - 4 + floatOffset, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#000000';
-    ctx.beginPath();
-    ctx.arc(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/3 - 4 + floatOffset, 2, 0, Math.PI * 2);
+    ctx.moveTo(enemy.x + enemy.width/2 - 12, enemy.y + 14 + floatOffset);
+    ctx.lineTo(enemy.x + enemy.width/2 - 15, enemy.y + 16 + floatOffset);
+    ctx.lineTo(enemy.x + enemy.width/2 - 12, enemy.y + 18 + floatOffset);
+    ctx.closePath();
     ctx.fill();
 }
 

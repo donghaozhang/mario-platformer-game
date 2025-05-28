@@ -156,6 +156,21 @@ mario/
       - [x] Streamlined Boss enemy with clearer spikes and health bar
       - [x] Classic Koopa shell with proper spinning animation
       - [x] Added CSS animations for enemy encounters and defeat effects
+      - [x] **Koopa Improvements**:
+        - [x] Proper dome-shaped green shell with segmented pattern
+        - [x] Bald yellow-green head (authentic to Mario series)
+        - [x] Single visible eye with proper positioning
+        - [x] Yellow feet that show beneath the shell
+        - [x] Lighter belly area on shell
+        - [x] Yellow beak on the side of head
+      - [x] **Flying Enemy (Paratroopa) Improvements**:
+        - [x] Red shell body (classic red Paratroopa)
+        - [x] Proper feathered white wings with black outline
+        - [x] Wings that flap more realistically
+        - [x] Aviator goggles for the flying variant
+        - [x] Same head style as regular Koopa
+        - [x] Feet tucked up while flying
+        - [x] Better floating animation
 
 ## 🔧 Necessary Functions
 
