@@ -343,175 +343,259 @@ function drawEnemies() {
 function drawGoomba(enemy) {
     // Animation frame for walking
     const walkFrame = Math.floor(enemy.animationFrame / 10) % 2;
-    const squashAmount = walkFrame * 2;
+    const squashAmount = walkFrame * 1.5;
+    const time = Date.now() / 1000;
     
-    // Mushroom body
-    ctx.fillStyle = '#8B4513';
-    ctx.fillRect(enemy.x + 2, enemy.y + 8 + squashAmount, enemy.width - 4, enemy.height - 8 - squashAmount);
+    // Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height, enemy.width/2 - 2, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
     
-    // Mushroom cap with gradient effect
+    // Main mushroom body (more compact and round)
+    const bodyGradient = ctx.createRadialGradient(
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2,
+        0,
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2,
+        enemy.width/2
+    );
+    bodyGradient.addColorStop(0, '#8B4513');
+    bodyGradient.addColorStop(0.7, '#654321');
+    bodyGradient.addColorStop(1, '#4B2F20');
+    ctx.fillStyle = bodyGradient;
+    
+    // Body shape (more rounded)
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2 + squashAmount/2, 
+                enemy.width/2 - 1, enemy.height/2 - 3 - squashAmount/2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Feet (simpler, more visible)
+    ctx.fillStyle = '#000000';
+    const footWidth = 8;
+    const footHeight = 4;
+    
+    if (walkFrame === 0) {
+        // Left foot forward
+        ctx.fillRect(enemy.x + 2, enemy.y + enemy.height - footHeight, footWidth, footHeight);
+        ctx.fillRect(enemy.x + enemy.width - footWidth - 2, enemy.y + enemy.height - footHeight + 1, footWidth, footHeight - 1);
+    } else {
+        // Right foot forward
+        ctx.fillRect(enemy.x + 2, enemy.y + enemy.height - footHeight + 1, footWidth, footHeight - 1);
+        ctx.fillRect(enemy.x + enemy.width - footWidth - 2, enemy.y + enemy.height - footHeight, footWidth, footHeight);
+    }
+    
+    // Face area (lighter brown)
     ctx.fillStyle = '#A0522D';
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + 10, enemy.width/2 - 2, 10 - squashAmount/2, 0, 0, Math.PI * 2);
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 - 2, 
+                enemy.width/2 - 3, enemy.height/3, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Cap highlight
-    ctx.fillStyle = '#CD853F';
-    ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2 - 3, enemy.y + 8, enemy.width/3, 6, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Angry eyebrows
+    // Angry eyebrows (thick and prominent)
     ctx.fillStyle = '#000000';
-    ctx.fillRect(enemy.x + 6, enemy.y + 5, 6, 2);
-    ctx.fillRect(enemy.x + enemy.width - 12, enemy.y + 5, 6, 2);
+    ctx.save();
+    ctx.translate(enemy.x + enemy.width/2 - 6, enemy.y + enemy.height/2 - 8);
+    ctx.rotate(-0.4);
+    ctx.fillRect(0, 0, 8, 3);
+    ctx.restore();
     
-    // Eyes with direction
+    ctx.save();
+    ctx.translate(enemy.x + enemy.width/2 + 6, enemy.y + enemy.height/2 - 8);
+    ctx.rotate(0.4);
+    ctx.fillRect(-8, 0, 8, 3);
+    ctx.restore();
+    
+    // Eyes (simple white with black pupils)
+    // Left eye
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(enemy.x + 7, enemy.y + 8, 5, 5);
-    ctx.fillRect(enemy.x + enemy.width - 12, enemy.y + 8, 5, 5);
-    
-    // Pupils looking in movement direction
+    ctx.fillRect(enemy.x + enemy.width/2 - 8, enemy.y + enemy.height/2 - 4, 6, 8);
     ctx.fillStyle = '#000000';
-    const pupilOffset = enemy.velocityX > 0 ? 2 : 0;
-    ctx.fillRect(enemy.x + 8 + pupilOffset, enemy.y + 9, 2, 3);
-    ctx.fillRect(enemy.x + enemy.width - 11 + pupilOffset, enemy.y + 9, 2, 3);
+    ctx.fillRect(enemy.x + enemy.width/2 - 7, enemy.y + enemy.height/2 - 2, 4, 5);
     
-    // Frown mouth
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2;
+    // Right eye
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/2 - 4, 6, 8);
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(enemy.x + enemy.width/2 + 3, enemy.y + enemy.height/2 - 2, 4, 5);
+    
+    // Mouth (simple frown with fangs)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(enemy.x + enemy.width/2 - 6, enemy.y + enemy.height/2 + 4, 12, 2);
+    
+    // Fangs
+    ctx.fillStyle = '#FFFFFF';
     ctx.beginPath();
-    ctx.arc(enemy.x + enemy.width/2, enemy.y + 18, 4, 0, Math.PI);
-    ctx.stroke();
+    ctx.moveTo(enemy.x + enemy.width/2 - 4, enemy.y + enemy.height/2 + 4);
+    ctx.lineTo(enemy.x + enemy.width/2 - 2, enemy.y + enemy.height/2 + 7);
+    ctx.lineTo(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 4);
+    ctx.fill();
     
-    // Feet with walking animation
-    ctx.fillStyle = '#654321';
-    if (walkFrame === 0) {
-        ctx.fillRect(enemy.x + 2, enemy.y + enemy.height - 4, 6, 4);
-        ctx.fillRect(enemy.x + enemy.width - 8, enemy.y + enemy.height - 4, 6, 4);
-    } else {
-        ctx.fillRect(enemy.x + 5, enemy.y + enemy.height - 4, 6, 4);
-        ctx.fillRect(enemy.x + enemy.width - 11, enemy.y + enemy.height - 4, 6, 4);
-    }
+    ctx.beginPath();
+    ctx.moveTo(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 4);
+    ctx.lineTo(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/2 + 7);
+    ctx.lineTo(enemy.x + enemy.width/2 + 4, enemy.y + enemy.height/2 + 4);
+    ctx.fill();
 }
 
 function drawKoopa(enemy) {
     const walkFrame = Math.floor(enemy.animationFrame / 8) % 4;
-    const bobAmount = Math.sin(enemy.animationFrame * 0.1) * 2;
+    const bobAmount = Math.sin(enemy.animationFrame * 0.1) * 1;
     
-    // Shell back
-    ctx.fillStyle = '#228B22';
+    // Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + 15 + bobAmount, enemy.width/2 - 2, 12, 0, 0, Math.PI * 2);
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height, enemy.width/2 - 2, 3, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Shell pattern
-    ctx.strokeStyle = '#006400';
-    ctx.lineWidth = 2;
-    // Hexagon pattern on shell
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 2; j++) {
-            ctx.strokeRect(enemy.x + 5 + i * 8, enemy.y + 10 + j * 8 + bobAmount, 6, 6);
-        }
-    }
+    // Shell (main body)
+    const shellGradient = ctx.createRadialGradient(
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2,
+        0,
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2,
+        enemy.width/2
+    );
+    shellGradient.addColorStop(0, '#32CD32');
+    shellGradient.addColorStop(0.7, '#228B22');
+    shellGradient.addColorStop(1, '#006400');
+    ctx.fillStyle = shellGradient;
     
-    // Head and neck
-    ctx.fillStyle = '#90EE90';
-    ctx.fillRect(enemy.x + 8, enemy.y + 2 + bobAmount, 14, 8);
-    ctx.fillRect(enemy.x + 10, enemy.y + 8 + bobAmount, 10, 4);
+    // Shell shape
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 4 + bobAmount, 
+                enemy.width/2 - 2, enemy.height/3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Shell rim
+    ctx.strokeStyle = '#FFFF00';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 4 + bobAmount, 
+                enemy.width/2 - 2, enemy.height/3, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Head (yellow-green)
+    ctx.fillStyle = '#9ACD32';
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/3 + bobAmount, 
+                enemy.width/3, enemy.height/4, 0, 0, Math.PI * 2);
+    ctx.fill();
     
     // Beak
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.moveTo(enemy.x + 8, enemy.y + 5 + bobAmount);
-    ctx.lineTo(enemy.x + 4, enemy.y + 7 + bobAmount);
-    ctx.lineTo(enemy.x + 8, enemy.y + 9 + bobAmount);
+    ctx.ellipse(enemy.x + enemy.width/2 - 8, enemy.y + enemy.height/3 + bobAmount, 
+                4, 3, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Eyes
+    // Eye
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(enemy.x + 12, enemy.y + 3 + bobAmount, 4, 4);
-    ctx.fillRect(enemy.x + 17, enemy.y + 3 + bobAmount, 4, 4);
-    
-    // Pupils
+    ctx.beginPath();
+    ctx.arc(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/3 - 2 + bobAmount, 4, 0, Math.PI * 2);
+    ctx.fill();
     ctx.fillStyle = '#000000';
-    ctx.fillRect(enemy.x + 13, enemy.y + 4 + bobAmount, 2, 2);
-    ctx.fillRect(enemy.x + 18, enemy.y + 4 + bobAmount, 2, 2);
+    ctx.beginPath();
+    ctx.arc(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/3 - 2 + bobAmount, 2, 0, Math.PI * 2);
+    ctx.fill();
     
-    // Feet with walking animation
+    // Feet (yellow)
     ctx.fillStyle = '#FFD700';
-    const footOffset = walkFrame < 2 ? 0 : 3;
-    ctx.fillRect(enemy.x + 3 + footOffset, enemy.y + enemy.height - 5, 6, 5);
-    ctx.fillRect(enemy.x + enemy.width - 9 - footOffset, enemy.y + enemy.height - 5, 6, 5);
+    const footOffset = walkFrame < 2 ? 0 : 2;
     
-    // Tail
-    ctx.fillStyle = '#90EE90';
-    ctx.fillRect(enemy.x + enemy.width - 4, enemy.y + 12 + bobAmount, 6, 4);
+    // Left foot
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + 6 + footOffset, enemy.y + enemy.height - 3, 5, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Right foot
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width - 6 - footOffset, enemy.y + enemy.height - 3, 5, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 function drawFlyingEnemy(enemy) {
-    const wingFlap = Math.sin(Date.now() * 0.02) * 5;
-    const floatOffset = Math.sin(Date.now() * 0.005) * 3;
+    const wingFlap = Math.sin(Date.now() * 0.03) * 8;
+    const floatOffset = Math.sin(Date.now() * 0.005) * 2;
     
-    // Main body (red koopa paratroopa style)
-    ctx.fillStyle = '#DC143C';
+    // Shadow (smaller and offset for flying)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset, enemy.width/2 - 3, enemy.height/2 - 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height + 8, enemy.width/3, 2, 0, 0, Math.PI * 2);
     ctx.fill();
     
-    // Shell pattern
-    ctx.strokeStyle = '#8B0000';
-    ctx.lineWidth = 1;
+    // Main body (red shell)
+    const bodyGradient = ctx.createRadialGradient(
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset,
+        0,
+        enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset,
+        enemy.width/2
+    );
+    bodyGradient.addColorStop(0, '#FF6347');
+    bodyGradient.addColorStop(0.7, '#DC143C');
+    bodyGradient.addColorStop(1, '#8B0000');
+    ctx.fillStyle = bodyGradient;
+    
+    // Body
     ctx.beginPath();
-    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + floatOffset, enemy.width/2 - 5, enemy.height/2 - 7, 0, 0, Math.PI * 2);
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2 + floatOffset, 
+                enemy.width/2 - 2, enemy.height/3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Shell rim
+    ctx.strokeStyle = '#FFFF00';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/2 + 2 + floatOffset, 
+                enemy.width/2 - 2, enemy.height/3, 0, 0, Math.PI * 2);
     ctx.stroke();
     
-    // Wings (animated)
+    // Wings (simple white)
     ctx.fillStyle = '#FFFFFF';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1;
+    
     // Left wing
     ctx.save();
-    ctx.translate(enemy.x + 5, enemy.y + 8 + floatOffset);
+    ctx.translate(enemy.x + 2, enemy.y + enemy.height/3 + floatOffset);
     ctx.rotate(wingFlap * 0.02);
     ctx.beginPath();
-    ctx.ellipse(-5, 0, 8, 4 + Math.abs(wingFlap)/2, -0.3, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 8, 4, -0.5, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
     ctx.restore();
     
     // Right wing
     ctx.save();
-    ctx.translate(enemy.x + enemy.width - 5, enemy.y + 8 + floatOffset);
+    ctx.translate(enemy.x + enemy.width - 2, enemy.y + enemy.height/3 + floatOffset);
     ctx.rotate(-wingFlap * 0.02);
     ctx.beginPath();
-    ctx.ellipse(5, 0, 8, 4 + Math.abs(wingFlap)/2, 0.3, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 8, 4, 0.5, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
     ctx.restore();
     
-    // Wing details
-    ctx.strokeStyle = '#CCCCCC';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    
     // Head
-    ctx.fillStyle = '#FFB6C1';
-    ctx.fillRect(enemy.x + 8, enemy.y + 2 + floatOffset, 14, 8);
-    
-    // Goggles/Eyes
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(enemy.x + 9, enemy.y + 3 + floatOffset, 5, 5);
-    ctx.fillRect(enemy.x + 16, enemy.y + 3 + floatOffset, 5, 5);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(enemy.x + 10, enemy.y + 4 + floatOffset, 3, 3);
-    ctx.fillRect(enemy.x + 17, enemy.y + 4 + floatOffset, 3, 3);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(enemy.x + 11, enemy.y + 5 + floatOffset, 1, 1);
-    ctx.fillRect(enemy.x + 18, enemy.y + 5 + floatOffset, 1, 1);
+    ctx.fillStyle = '#9ACD32';
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height/3 - 2 + floatOffset, 
+                enemy.width/3, enemy.height/4, 0, 0, Math.PI * 2);
+    ctx.fill();
     
     // Beak
-    ctx.fillStyle = '#FFA500';
+    ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.moveTo(enemy.x + 8, enemy.y + 6 + floatOffset);
-    ctx.lineTo(enemy.x + 5, enemy.y + 8 + floatOffset);
-    ctx.lineTo(enemy.x + 8, enemy.y + 10 + floatOffset);
+    ctx.ellipse(enemy.x + enemy.width/2 - 8, enemy.y + enemy.height/3 - 2 + floatOffset, 
+                4, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Eye
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/3 - 4 + floatOffset, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(enemy.x + enemy.width/2 + 2, enemy.y + enemy.height/3 - 4 + floatOffset, 2, 0, Math.PI * 2);
     ctx.fill();
 }
 
@@ -519,70 +603,78 @@ function drawBossEnemy(enemy) {
     const pulseAmount = Math.sin(Date.now() * 0.003) * 2;
     const angryFlash = enemy.health < enemy.maxHealth / 2;
     
-    // Spiky shell body
-    const gradient = ctx.createRadialGradient(
+    // Large shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height, enemy.width/2, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Main body (spiky purple/red)
+    const bodyGradient = ctx.createRadialGradient(
         enemy.x + enemy.width/2, enemy.y + enemy.height/2,
         0,
         enemy.x + enemy.width/2, enemy.y + enemy.height/2,
         enemy.width/2
     );
-    gradient.addColorStop(0, angryFlash ? '#FF1493' : '#8B008B');
-    gradient.addColorStop(1, angryFlash ? '#8B0000' : '#4B0082');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(enemy.x, enemy.y + 5, enemy.width, enemy.height - 5);
     
-    // Spikes around the shell
-    ctx.fillStyle = angryFlash ? '#FF0000' : '#9400D3';
-    for (let i = 0; i < enemy.width; i += 10) {
-        // Top spikes
-        ctx.beginPath();
-        ctx.moveTo(enemy.x + i, enemy.y + 5);
-        ctx.lineTo(enemy.x + i + 5, enemy.y - 5 - pulseAmount);
-        ctx.lineTo(enemy.x + i + 10, enemy.y + 5);
-        ctx.fill();
-        
-        // Side spikes
-        if (i % 20 === 0) {
-            // Left spike
-            ctx.beginPath();
-            ctx.moveTo(enemy.x, enemy.y + i/2 + 10);
-            ctx.lineTo(enemy.x - 5 - pulseAmount, enemy.y + i/2 + 15);
-            ctx.lineTo(enemy.x, enemy.y + i/2 + 20);
-            ctx.fill();
-            
-            // Right spike
-            ctx.beginPath();
-            ctx.moveTo(enemy.x + enemy.width, enemy.y + i/2 + 10);
-            ctx.lineTo(enemy.x + enemy.width + 5 + pulseAmount, enemy.y + i/2 + 15);
-            ctx.lineTo(enemy.x + enemy.width, enemy.y + i/2 + 20);
-            ctx.fill();
-        }
+    if (angryFlash) {
+        bodyGradient.addColorStop(0, '#FF1493');
+        bodyGradient.addColorStop(0.7, '#DC143C');
+        bodyGradient.addColorStop(1, '#8B0000');
+    } else {
+        bodyGradient.addColorStop(0, '#9370DB');
+        bodyGradient.addColorStop(0.7, '#8B008B');
+        bodyGradient.addColorStop(1, '#4B0082');
     }
     
-    // Angry face
-    ctx.fillStyle = '#FFFF00';
-    ctx.fillRect(enemy.x + 10, enemy.y + 10, 10, 8);
-    ctx.fillRect(enemy.x + enemy.width - 20, enemy.y + 10, 10, 8);
+    ctx.fillStyle = bodyGradient;
+    ctx.fillRect(enemy.x + 2, enemy.y + 10, enemy.width - 4, enemy.height - 10);
     
-    // Glowing red eyes
-    ctx.fillStyle = '#FF0000';
+    // Spikes (simpler, more visible)
+    ctx.fillStyle = angryFlash ? '#FF0000' : '#9400D3';
+    
+    // Top spikes
+    for (let i = 0; i < enemy.width - 4; i += 12) {
+        ctx.beginPath();
+        ctx.moveTo(enemy.x + 2 + i, enemy.y + 10);
+        ctx.lineTo(enemy.x + 2 + i + 6, enemy.y - pulseAmount);
+        ctx.lineTo(enemy.x + 2 + i + 12, enemy.y + 10);
+        ctx.fill();
+    }
+    
+    // Side spikes
+    for (let i = 0; i < 2; i++) {
+        const y = enemy.y + 20 + i * 20;
+        // Left
+        ctx.beginPath();
+        ctx.moveTo(enemy.x + 2, y);
+        ctx.lineTo(enemy.x - 5 - pulseAmount, y + 5);
+        ctx.lineTo(enemy.x + 2, y + 10);
+        ctx.fill();
+        // Right
+        ctx.beginPath();
+        ctx.moveTo(enemy.x + enemy.width - 2, y);
+        ctx.lineTo(enemy.x + enemy.width + 5 + pulseAmount, y + 5);
+        ctx.lineTo(enemy.x + enemy.width - 2, y + 10);
+        ctx.fill();
+    }
+    
+    // Face
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(enemy.x + 8, enemy.y + 15, enemy.width - 16, 20);
+    
+    // Glowing eyes
     ctx.shadowColor = '#FF0000';
     ctx.shadowBlur = 5;
-    ctx.fillRect(enemy.x + 12, enemy.y + 12, 6, 4);
-    ctx.fillRect(enemy.x + enemy.width - 18, enemy.y + 12, 6, 4);
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(enemy.x + 12, enemy.y + 18, 6, 6);
+    ctx.fillRect(enemy.x + enemy.width - 18, enemy.y + 18, 6, 6);
     ctx.shadowBlur = 0;
     
-    // Angry mouth
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(enemy.x + 15, enemy.y + 25, enemy.width - 30, 3);
-    // Teeth
+    // Mouth with teeth
     ctx.fillStyle = '#FFFFFF';
-    for (let i = 0; i < enemy.width - 30; i += 5) {
-        ctx.beginPath();
-        ctx.moveTo(enemy.x + 15 + i, enemy.y + 25);
-        ctx.lineTo(enemy.x + 17 + i, enemy.y + 28);
-        ctx.lineTo(enemy.x + 19 + i, enemy.y + 25);
-        ctx.fill();
+    for (let i = 0; i < enemy.width - 20; i += 6) {
+        ctx.fillRect(enemy.x + 10 + i, enemy.y + 28, 4, 4);
     }
     
     // Health bar
@@ -590,18 +682,15 @@ function drawBossEnemy(enemy) {
     const barHeight = 6;
     const healthPercent = enemy.health / enemy.maxHealth;
     
-    // Health bar background
+    // Background
     ctx.fillStyle = '#333333';
     ctx.fillRect(enemy.x, enemy.y - 10, barWidth, barHeight);
     
-    // Health bar fill
-    const healthGradient = ctx.createLinearGradient(enemy.x, 0, enemy.x + barWidth * healthPercent, 0);
-    healthGradient.addColorStop(0, healthPercent > 0.5 ? '#00FF00' : healthPercent > 0.25 ? '#FFFF00' : '#FF0000');
-    healthGradient.addColorStop(1, healthPercent > 0.5 ? '#00AA00' : healthPercent > 0.25 ? '#AAAA00' : '#AA0000');
-    ctx.fillStyle = healthGradient;
+    // Health
+    ctx.fillStyle = healthPercent > 0.5 ? '#00FF00' : healthPercent > 0.25 ? '#FFFF00' : '#FF0000';
     ctx.fillRect(enemy.x, enemy.y - 10, barWidth * healthPercent, barHeight);
     
-    // Health bar border
+    // Border
     ctx.strokeStyle = '#FFFFFF';
     ctx.lineWidth = 1;
     ctx.strokeRect(enemy.x, enemy.y - 10, barWidth, barHeight);
@@ -609,7 +698,13 @@ function drawBossEnemy(enemy) {
 
 function drawKoopaShell(enemy) {
     const isMoving = Math.abs(enemy.velocityX) > 1;
-    const spinAngle = isMoving ? Date.now() * 0.05 : 0;
+    const spinAngle = isMoving ? Date.now() * 0.1 : 0;
+    
+    // Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(enemy.x + enemy.width/2, enemy.y + enemy.height, enemy.width/2 - 2, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
     
     ctx.save();
     ctx.translate(enemy.x + enemy.width/2, enemy.y + enemy.height/2);
@@ -622,36 +717,40 @@ function drawKoopaShell(enemy) {
     shellGradient.addColorStop(1, '#006400');
     ctx.fillStyle = shellGradient;
     ctx.beginPath();
-    ctx.ellipse(0, 0, enemy.width/2, enemy.height/2, 0, 0, Math.PI * 2);
+    ctx.arc(0, 0, enemy.width/2 - 1, 0, Math.PI * 2);
     ctx.fill();
     
-    // Shell pattern (hexagons)
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1;
-    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 3) {
-        const x = Math.cos(angle) * 8;
-        const y = Math.sin(angle) * 8;
-        ctx.beginPath();
-        ctx.moveTo(x + 4, y);
-        ctx.lineTo(x + 2, y + 3);
-        ctx.lineTo(x - 2, y + 3);
-        ctx.lineTo(x - 4, y);
-        ctx.lineTo(x - 2, y - 3);
-        ctx.lineTo(x + 2, y - 3);
-        ctx.closePath();
-        ctx.stroke();
-    }
+    // Shell rim
+    ctx.strokeStyle = '#FFFF00';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, enemy.width/2 - 1, 0, Math.PI * 2);
+    ctx.stroke();
     
-    // Motion blur effect when spinning fast
-    if (isMoving) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(0, 0, enemy.width/2 - 2, 0, Math.PI * 2);
-        ctx.stroke();
-    }
+    // Simple pattern
+    ctx.strokeStyle = '#006400';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-enemy.width/3, 0);
+    ctx.lineTo(enemy.width/3, 0);
+    ctx.moveTo(0, -enemy.height/3);
+    ctx.lineTo(0, enemy.height/3);
+    ctx.stroke();
     
     ctx.restore();
+    
+    // Motion lines if moving
+    if (isMoving) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        const direction = enemy.velocityX > 0 ? -1 : 1;
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo(enemy.x + enemy.width/2 + direction * 10, enemy.y + 5 + i * 5);
+            ctx.lineTo(enemy.x + enemy.width/2 + direction * 20, enemy.y + 5 + i * 5);
+            ctx.stroke();
+        }
+    }
 }
 
 // Draw coins with 3D spinning effect and sprite support

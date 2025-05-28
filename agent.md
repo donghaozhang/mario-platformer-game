@@ -145,6 +145,17 @@ mario/
   - [x] Weather effects
   - [x] Download some image assest from internet, add them to the game
   - [x] Better sprite graphics
+    - [x] Enhanced Mario sprite with detailed features (hat, mustache, overalls, gloves)
+    - [x] Improved enemy sprites with animations and 3D effects
+    - [x] Added shadows, gradients, and visual depth to all characters
+    - [x] CSS animations for UI feedback (score increases, life loss, power-ups)
+    - [x] **Enemy Visual Improvements (Based on Screenshot)**:
+      - [x] Simplified Goomba design with cleaner mushroom shape and visible feet
+      - [x] More authentic Koopa with green shell and yellow rim (classic Mario style)
+      - [x] Flying Koopa Paratroopa with red shell and simple white wings
+      - [x] Streamlined Boss enemy with clearer spikes and health bar
+      - [x] Classic Koopa shell with proper spinning animation
+      - [x] Added CSS animations for enemy encounters and defeat effects
 
 ## 🔧 Necessary Functions
 
