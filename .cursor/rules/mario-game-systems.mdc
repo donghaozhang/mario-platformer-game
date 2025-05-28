@@ -1,0 +1,38 @@
+---
+description:
+  Combined animation, enemy, power-up, and sound system guide
+globs:
+  - '**'
+alwaysApply: false
+---
+# Mario Game Systems Guide
+
+This rule covers the main gameplay systems used in the Mario game.
+
+## Animation System
+- Objects track `animationFrame` and `animationTimer`
+- Player animations: idle, 4-frame walking (8 frame timing), jumping
+- Enemy animations follow similar patterns (e.g., Goomba 2-frame bounce)
+- Animations tie into physics, collisions, particles, sound, and rendering
+
+## Enemy Variety
+- Five enemy types: **Goomba**, **Koopa**, **Flying**, **Boss**, and **Koopa Shell**
+- Each has unique movement and AI behavior
+- To add an enemy: create update logic, animations, collision handling, and drawing functions
+
+## Power-ups
+- **Mushroom** grows Mario
+- **Fire Flower** enables fireball attacks
+- **Star** grants temporary invincibility
+- Player tracks `powerUpState` and `starTimer`
+- Fireballs bounce with gravity and expire after a short time
+
+## Sound System
+- Implemented with the Web Audio API
+- Sounds: jump, coin, enemy defeat, game over, background music
+- Toggle audio with the **M** key and on-screen button
+- Keep UI in sync with sound state and clean up music on restart
+
+## Integration Notes
+- Systems share data via the global `gameState` object
+- Keep update loops efficient to maintain 60 FPS

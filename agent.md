@@ -10,11 +10,8 @@ mario/
 ├── agent.md            # This documentation file
 ├── .cursor/
 │   └── rules/          # Cursor IDE development rules
-│       ├── mario-game-structure.mdc
-│       ├── mario-sound-system.mdc
-│       ├── mario-animation-system.mdc
-│       ├── mario-power-ups-system.mdc
-│       └── game-development-patterns.mdc
+│       ├── mario-architecture.mdc
+│       └── mario-game-systems.mdc
 └── js/                 # Modular JavaScript files (9 modules)
     ├── gameState.js    # Game state, player object, and global variables (56 lines)
     ├── assetLoader.js  # Placeholder asset loading system (87 lines)
@@ -312,3 +309,5 @@ This documentation serves as a roadmap for continued development and maintenance
 3. Updated `mario-game-structure.mdc` and `mario-modular-architecture.mdc` to reference the new module and adjusted module counts.
 4. Updated this `agent.md` to list `assetLoader.js` and new totals.
 5. All changes committed to keep documentation consistent with the codebase.
+6. Consolidated multiple rule files into `mario-architecture.mdc` and
+   `mario-game-systems.mdc` for a simpler `.cursor/rules` directory.
