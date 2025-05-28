@@ -14,6 +14,7 @@ A fun HTML5 Mario-style platformer game built with vanilla JavaScript, HTML, and
 - **Lives system** with game over functionality
 - **Level progression** with increasing difficulty
 - **Responsive design** that works on different screen sizes
+- **No external assets required** – graphics are drawn with pure JavaScript
 
 ## How to Play
 
