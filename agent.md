@@ -141,9 +141,9 @@ mario/
 - [x] **Advanced Features**
   - [x] Local high score storage
 
-- [ ] **Visual Enhancements**
-  - Weather effects
-  - Better sprite graphics
+- [x] **Visual Enhancements**
+  - [x] Weather effects
+  - [ ] Better sprite graphics
 
 ## 🔧 Necessary Functions
 
