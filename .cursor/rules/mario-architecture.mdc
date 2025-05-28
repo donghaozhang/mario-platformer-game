@@ -1,0 +1,52 @@
+---
+description:
+  Combined architecture and development guideline
+globs:
+  - '**'
+alwaysApply: false
+---
+# Mario Game Architecture
+
+This document combines project structure, modular architecture, and core development patterns for the Mario game.
+
+## Project Structure
+- **index.html** – Game canvas and script loading
+- **style.css** – Responsive design and animations
+- **README.md** – Game documentation
+- **agent.md** – Development notes and logs
+- **js/** – Nine JavaScript modules handling state, systems, rendering, and the main game loop
+
+## Module Loading Order
+1. `gameState.js`
+2. `assetLoader.js`
+3. `soundSystem.js`
+4. `levelSystem.js`
+5. `physics.js`
+6. `particles.js`
+7. `animations.js`
+8. `renderer.js`
+9. `main.js`
+
+## Development Guidelines
+- 60 FPS game loop using `requestAnimationFrame`
+- Collision detection via AABB method
+- Global `gameState` object for shared data
+- Particle system for visual feedback
+- Responsive design through CSS media queries
+
+### Game Loop Pattern
+```javascript
+function gameLoop() {
+    handleInput();
+    updatePlayer();
+    updateEnemies();
+    updateParticles();
+    render();
+    requestAnimationFrame(gameLoop);
+}
+```
+
+### Extension Patterns
+- Create objects with position, dimensions, physics, visual, and state properties
+- Add objects to appropriate arrays and implement update, collision, and rendering logic
+- Adjust difficulty by modifying physics constants and enemy speeds
