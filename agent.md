@@ -138,11 +138,11 @@ mario/
   - [x] Enemy-specific point values and animations
 
 ### Low Priority
-- [ ] **Advanced Features**
-  - Local high score storage
-  - Mobile touch controls
-  - Gamepad support
-  - Level editor mode
+- [x] **Advanced Features**
+  - [x] Local high score storage
+  - [ ] Mobile touch controls
+  - [ ] Gamepad support
+  - [ ] Level editor mode
 
 - [ ] **Visual Enhancements**
   - Parallax scrolling background
