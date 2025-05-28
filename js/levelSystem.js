@@ -181,6 +181,15 @@ function createLevel() {
         return;
     }
     
+    // Reset weather
+    gameState.weather.type = 'none';
+    gameState.weather.particles = [];
+
+    // Set weather based on level
+    if (gameState.level === 2) { // Make it rain in Level 2 (Underground Caverns)
+        gameState.weather.type = 'rain';
+    }
+    
     // Reset arrays
     platforms = [];
     enemies = [];

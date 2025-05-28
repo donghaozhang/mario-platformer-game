@@ -11,7 +11,11 @@ let gameState = {
     gameRunning: true,
     keys: {},
     maxLevel: 3,
-    highScore: 0
+    highScore: 0,
+    weather: {
+        type: 'none', // Can be 'rain', 'snow', etc.
+        particles: []
+    }
 };
 
 // Player object

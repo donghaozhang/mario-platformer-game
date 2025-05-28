@@ -79,14 +79,26 @@ function createBlockBreakParticles(x, y) {
 
 // Create particle effects for secret area discovery
 function createSecretAreaParticles(x, y) {
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 30; i++) {
         particles.push({
             x: x,
             y: y,
-            velocityX: (Math.random() - 0.5) * 10,
-            velocityY: Math.random() * -8 - 2,
-            color: ['#FFD700', '#FFFF00', '#FFA500', '#FF69B4'][Math.floor(Math.random() * 4)],
-            life: 50
+            velocityX: (Math.random() - 0.5) * 5,
+            velocityY: (Math.random() - 0.5) * 5,
+            life: 60,
+            color: '#FFD700' // Gold color
         });
     }
+}
+
+// Create rain particles
+function createRainParticle() {
+    gameState.weather.particles.push({
+        x: Math.random() * canvas.width,
+        y: -10, // Start above screen
+        width: 2,
+        height: 10,
+        velocityY: Math.random() * 3 + 2, // Raindrop speed
+        color: '#ADD8E6' // Light blue
+    });
 } 

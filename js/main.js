@@ -296,9 +296,32 @@ function gameLoop() {
     updateMovingPlatforms();
     updateFireballs();
     updateParticles();
+    updateWeather();
     render();
     
     requestAnimationFrame(gameLoop);
+}
+
+// Update weather effects
+function updateWeather() {
+    if (gameState.weather.type === 'rain') {
+        // Create new raindrops periodically
+        if (Math.random() < 0.2) { // Adjust probability for more/less rain
+            createRainParticle();
+        }
+
+        // Update existing raindrops
+        for (let i = gameState.weather.particles.length - 1; i >= 0; i--) {
+            let particle = gameState.weather.particles[i];
+            particle.y += particle.velocityY;
+
+            // Remove raindrops that fall off screen
+            if (particle.y > canvas.height) {
+                gameState.weather.particles.splice(i, 1);
+            }
+        }
+    }
+    // Add other weather types like 'snow' here later
 }
 
 // Start the game

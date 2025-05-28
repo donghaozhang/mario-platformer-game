@@ -140,15 +140,10 @@ mario/
 ### Low Priority
 - [x] **Advanced Features**
   - [x] Local high score storage
-  - [ ] Mobile touch controls
-  - [ ] Gamepad support
-  - [ ] Level editor mode
 
 - [ ] **Visual Enhancements**
-  - Parallax scrolling background
   - Weather effects
   - Better sprite graphics
-  - Screen shake effects
 
 ## 🔧 Necessary Functions
 

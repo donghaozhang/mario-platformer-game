@@ -34,6 +34,9 @@ function render() {
     
     // Draw particles
     drawParticles();
+
+    // Draw weather effects
+    drawWeather();
 }
 
 // Draw background with gradient and clouds
@@ -599,4 +602,15 @@ function drawParticles() {
         ctx.fillStyle = particle.color;
         ctx.fillRect(particle.x, particle.y, 3, 3);
     }
+}
+
+// Draw weather effects
+function drawWeather() {
+    if (gameState.weather.type === 'rain') {
+        for (let particle of gameState.weather.particles) {
+            ctx.fillStyle = particle.color;
+            ctx.fillRect(particle.x, particle.y, particle.width, particle.height);
+        }
+    }
+    // Add other weather types like 'snow' here later
 } 
