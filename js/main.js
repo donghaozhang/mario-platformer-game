@@ -2,10 +2,12 @@
 
 // Initialize game
 function init() {
+    loadHighScore(); // Load saved high score
     initSounds();
     createLevel();
     gameLoop();
     setupEventListeners();
+    updateHighScore(); // Update high score display
     
     // Start background music
     setTimeout(() => {
@@ -154,17 +156,36 @@ function loseLife() {
 function levelComplete() {
     gameState.gameRunning = false;
     sounds.backgroundMusic.stop();
+    
+    // Check for new high score
+    const isNewHighScore = saveHighScore();
     playSound('levelComplete');
+    
+    if (isNewHighScore) {
+        alert(`🎉 NEW HIGH SCORE! ${gameState.score} points!`);
+    }
+    
     document.getElementById('levelScore').textContent = gameState.score;
     document.getElementById('levelComplete').classList.remove('hidden');
+    updateHighScore(); // Update high score display
 }
 
 function gameOver() {
     gameState.gameRunning = false;
     sounds.backgroundMusic.stop();
-    playSound('gameOver');
+    
+    // Check for new high score
+    const isNewHighScore = saveHighScore();
+    if (isNewHighScore) {
+        playSound('levelComplete'); // Use level complete sound for new high score
+        alert(`🎉 NEW HIGH SCORE! ${gameState.score} points!`);
+    } else {
+        playSound('gameOver');
+    }
+    
     document.getElementById('finalScore').textContent = gameState.score;
     document.getElementById('gameOver').classList.remove('hidden');
+    updateHighScore(); // Update high score display
 }
 
 function restartGame() {
@@ -246,6 +267,12 @@ function nextLevel() {
 // Update UI functions
 function updateScore() {
     document.getElementById('score').textContent = gameState.score;
+    
+    // Update high score if current score exceeds it
+    if (gameState.score > gameState.highScore) {
+        gameState.highScore = gameState.score;
+        updateHighScore();
+    }
 }
 
 function updateLives() {
@@ -254,6 +281,10 @@ function updateLives() {
 
 function updateCoins() {
     document.getElementById('coins').textContent = gameState.coins;
+}
+
+function updateHighScore() {
+    document.getElementById('highScore').textContent = gameState.highScore;
 }
 
 // Main game loop

@@ -10,7 +10,8 @@ let gameState = {
     level: 1,
     gameRunning: true,
     keys: {},
-    maxLevel: 3
+    maxLevel: 3,
+    highScore: 0
 };
 
 // Player object
@@ -53,4 +54,25 @@ let secretAreas = [];
 
 // Physics constants
 const gravity = 0.6;
-const friction = 0.85; 
+const friction = 0.85;
+
+// High score management functions
+function loadHighScore() {
+    const savedHighScore = localStorage.getItem('marioGameHighScore');
+    if (savedHighScore) {
+        gameState.highScore = parseInt(savedHighScore);
+    }
+}
+
+function saveHighScore() {
+    if (gameState.score > gameState.highScore) {
+        gameState.highScore = gameState.score;
+        localStorage.setItem('marioGameHighScore', gameState.highScore.toString());
+        return true; // New high score achieved
+    }
+    return false;
+}
+
+function getHighScore() {
+    return gameState.highScore;
+} 
