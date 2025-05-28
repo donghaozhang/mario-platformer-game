@@ -2,6 +2,62 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Basic entity class for shared properties
+class Entity {
+    constructor(props = {}) {
+        Object.assign(this, props);
+    }
+}
+
+// Player represented as a class for clearer state management
+class Player extends Entity {
+    constructor() {
+        super();
+        this.reset();
+    }
+
+    reset() {
+        this.x = 50;
+        this.y = 300;
+        this.width = 30;
+        this.height = 40;
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.speed = 3;
+        this.jumpPower = 12;
+        this.onGround = false;
+        this.color = '#FF0000';
+        this.direction = 1; // 1 for right, -1 for left
+        this.animationFrame = 0;
+        this.animationTimer = 0;
+        this.isWalking = false;
+        this.isJumping = false;
+        this.powerUpState = 'small';
+        this.invincible = false;
+        this.invincibleTimer = 0;
+        this.starPower = false;
+        this.starTimer = 0;
+        this.originalHeight = 40;
+        this.fireballs = [];
+    }
+
+    setPosition(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+// Enemy class to encapsulate enemy data
+class Enemy extends Entity {
+    constructor(props) {
+        super(props);
+        this.animationFrame = 0;
+        this.animationTimer = 0;
+        this.facingLeft = this.velocityX < 0;
+        this.defeated = false;
+    }
+}
+
 // Game state
 let gameState = {
     score: 0,
@@ -18,33 +74,8 @@ let gameState = {
     }
 };
 
-// Player object
-const player = {
-    x: 50,
-    y: 300,
-    width: 30,
-    height: 40,
-    velocityX: 0,
-    velocityY: 0,
-    speed: 3,
-    jumpPower: 12,
-    onGround: false,
-    color: '#FF0000',
-    direction: 1, // 1 for right, -1 for left
-    // Animation properties
-    animationFrame: 0,
-    animationTimer: 0,
-    isWalking: false,
-    isJumping: false,
-    // Power-up properties
-    powerUpState: 'small', // 'small', 'big', 'fire'
-    invincible: false,
-    invincibleTimer: 0,
-    starPower: false,
-    starTimer: 0,
-    originalHeight: 40,
-    fireballs: []
-};
+// Player instance
+const player = new Player();
 
 // Game objects arrays
 let platforms = [];

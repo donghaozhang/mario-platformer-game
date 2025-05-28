@@ -62,9 +62,9 @@ A fun HTML5 Mario-style platformer game built with vanilla JavaScript, HTML, and
 - **Particle system** for comprehensive visual feedback
 
 ### Architecture Overview
-- **gameState.js**: Centralized state management and player object
+- **gameState.js**: Centralized state management and `Player` class
 - **soundSystem.js**: Complete audio system with Web Audio API
-- **levelSystem.js**: Level data and interactive elements
+- **levelSystem.js**: Level data and interactive elements using an `Enemy` class
 - **physics.js**: Physics engine with collision detection
 - **particles.js**: Visual effects system
 - **animations.js**: Sprite animation framework

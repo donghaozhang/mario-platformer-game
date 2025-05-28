@@ -201,11 +201,7 @@ function createLevel() {
     
     // Load level data
     platforms = currentLevelData.platforms.map(p => ({...p}));
-    enemies = currentLevelData.enemies.map(e => ({
-        ...e,
-        animationFrame: 0,
-        animationTimer: 0
-    }));
+    enemies = currentLevelData.enemies.map(e => new Enemy(e));
     coins = currentLevelData.coins.map(c => ({
         ...c,
         animationFrame: 0,
