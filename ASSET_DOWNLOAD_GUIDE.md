@@ -1,8 +1,8 @@
 # Free Mario-Style Game Assets Download Guide
 
-## 🎮 Recommended Free Asset Packs
+The game runs using simple shapes created with JavaScript, so external graphics are **not** required.  If you would like to enhance the visuals with pixel art sprites, consider the following free packs:
 
-I've found excellent free Mario-style platformer assets that you can download and integrate into your game:
+## 🎮 Recommended Free Asset Packs
 
 ### 1. **Super Mango Platformer Assets** (FREE - CC0)
 - **Source**: https://juhosprite.itch.io/super-mango-2d-pixelart-platformer-asset-pack16x16

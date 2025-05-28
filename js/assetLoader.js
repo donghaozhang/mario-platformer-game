@@ -1,107 +1,24 @@
 // Asset Loader Module
-// Handles loading and managing game sprites and images
+// Provides placeholder graphics using pure JavaScript.  No external
+// assets are loaded so the game can run out of the box.
 
 const assets = {
     images: {},
     loaded: false,
-    loadingProgress: 0,
-    totalAssets: 0,
-    loadedAssets: 0
+    loadingProgress: 0
 };
 
-// Asset paths configuration
-const assetPaths = {
-    player: {
-        idle: 'assets/sprites/player/mario_idle.png',
-        walk: 'assets/sprites/player/mario_walk.png',
-        jump: 'assets/sprites/player/mario_jump.png',
-        big: 'assets/sprites/player/mario_big.png',
-        fire: 'assets/sprites/player/mario_fire.png'
-    },
-    enemies: {
-        goomba: 'assets/sprites/enemies/goomba.png',
-        koopa: 'assets/sprites/enemies/koopa.png',
-        flying: 'assets/sprites/enemies/flying_enemy.png',
-        boss: 'assets/sprites/enemies/boss.png'
-    },
-    items: {
-        coin: 'assets/sprites/items/coin.png',
-        mushroom: 'assets/sprites/items/mushroom.png',
-        fireFlower: 'assets/sprites/items/fire_flower.png',
-        star: 'assets/sprites/items/star.png'
-    },
-    tiles: {
-        grass: 'assets/tiles/grass_platform.png',
-        brick: 'assets/tiles/brick_platform.png',
-        breakable: 'assets/tiles/breakable_block.png'
-    },
-    backgrounds: {
-        sky: 'assets/backgrounds/sky_background.png',
-        clouds: 'assets/backgrounds/clouds.png',
-        underground: 'assets/backgrounds/underground.png'
-    }
-};
 
-// Load a single image
-function loadImage(src, key) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-            assets.images[key] = img;
-            assets.loadedAssets++;
-            assets.loadingProgress = (assets.loadedAssets / assets.totalAssets) * 100;
-            console.log(`Loaded: ${key} (${Math.round(assets.loadingProgress)}%)`);
-            resolve(img);
-        };
-        img.onerror = () => {
-            console.warn(`Failed to load image: ${src}`);
-            // Create a fallback colored rectangle
-            const canvas = document.createElement('canvas');
-            canvas.width = 32;
-            canvas.height = 32;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#FF0000'; // Red fallback
-            ctx.fillRect(0, 0, 32, 32);
-            assets.images[key] = canvas;
-            assets.loadedAssets++;
-            assets.loadingProgress = (assets.loadedAssets / assets.totalAssets) * 100;
-            resolve(canvas);
-        };
-        img.src = src;
-    });
+// Load a single image - not used when running with placeholders
+function loadImage() {
+    return Promise.resolve();
 }
 
-// Load all assets
+// Load all assets (noop - placeholders are used instead)
 async function loadAllAssets() {
-    console.log('Starting asset loading...');
-    
-    const allAssets = [];
-    
-    // Flatten asset paths and create loading promises
-    for (const category in assetPaths) {
-        for (const item in assetPaths[category]) {
-            const key = `${category}_${item}`;
-            const src = assetPaths[category][item];
-            allAssets.push({ key, src });
-        }
-    }
-    
-    assets.totalAssets = allAssets.length;
-    assets.loadedAssets = 0;
-    
-    // Load all assets
-    const loadPromises = allAssets.map(asset => loadImage(asset.src, asset.key));
-    
-    try {
-        await Promise.all(loadPromises);
-        assets.loaded = true;
-        console.log('All assets loaded successfully!');
-        return true;
-    } catch (error) {
-        console.error('Error loading assets:', error);
-        assets.loaded = true; // Continue with fallbacks
-        return false;
-    }
+    assets.loaded = true;
+    assets.loadingProgress = 100;
+    return true;
 }
 
 // Get an asset by key
@@ -160,15 +77,11 @@ function createPlaceholderAssets() {
 
 // Initialize asset loading
 async function initAssets() {
-    // Create placeholders first
+    // Create placeholders
     createPlaceholderAssets();
-    
-    // Try to load real assets
-    const success = await loadAllAssets();
-    
-    if (!success) {
-        console.log('Using placeholder assets');
-    }
-    
+
+    // No external files to load, but keep async signature
+    await loadAllAssets();
+
     return assets.loaded;
-} 
+}
